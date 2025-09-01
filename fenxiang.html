@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>涩图time</title>
+    <title>测速</title>
     <style>
         /* 基础样式 */
         * {
@@ -215,7 +215,7 @@
     <div class="container">
         <!-- 头部信息 -->
         <div class="header">
-            <h1 class="title">标题标题</h1>
+            <h1 class="title">标题</h1>
             <div class="meta"></div>
         </div>
         
@@ -289,9 +289,28 @@
                 }
             }
 
+            function showStatus(message, isError = false) {
+                const statusEl = document.getElementById('gateStatus');
+                if (statusEl) {
+                    statusEl.textContent = message;
+                    statusEl.style.display = 'block';
+                    statusEl.style.background = isError ? '#fff0f0' : '#f0f8ff';
+                    statusEl.style.color = isError ? '#cc0000' : '#0066cc';
+                    // 3秒后自动隐藏
+                    setTimeout(() => {
+                        statusEl.style.display = 'none';
+                    }, 3000);
+                }
+            }
+
             function shareViaQQ() {
-                try {
-                    if (window.mqq && mqq.ui && mqq.ui.shareMessage) {
+                // 检测是否在QQ内置浏览器中
+                const isInQQ = /QQ\//i.test(navigator.userAgent) || (window.mqq && mqq.ui);
+                
+                if (isInQQ && window.mqq && mqq.ui && mqq.ui.shareMessage) {
+                    // 在QQ中，尝试调起分享
+                    showStatus('正在调起QQ分享...');
+                    try {
                         mqq.ui.shareMessage({
                             title: shareTitle,
                             desc: shareDesc,
@@ -299,18 +318,23 @@
                             share_url: shareUrl,
                             image_url: QR_IMG
                         }, function(result) {
-                            incrementShareCountAndMaybeUnlock();
+                            // 只有在分享成功回调中才计数
+                            if (result && result.retCode === 0) {
+                                showStatus('分享成功！已自动计数');
+                                incrementShareCountAndMaybeUnlock();
+                            } else {
+                                // 分享失败，提示用户手动分享
+                                showStatus('分享失败，请手动保存二维码图片发给好友，然后点击"我已分享"', true);
+                            }
                         });
-                        return;
+                    } catch (e) {
+                        // API调用异常，提示手动分享
+                        showStatus('无法调起分享，请手动保存二维码图片发给好友，然后点击"我已分享"', true);
                     }
-                } catch (e) {}
-                try {
-                    navigator.clipboard && navigator.clipboard.writeText(`${shareTitle} - ${shareUrl}`);
-                } catch (e) {}
-                const img = new Image();
-                img.src = QR_IMG;
-                window.open(shareUrl, '_blank');
-                incrementShareCountAndMaybeUnlock();
+                } else {
+                    // 不在QQ中或没有分享API，提示手动分享
+                    showStatus('请在QQ中打开此页面，或手动保存二维码图片发给好友，然后点击"我已分享"', true);
+                }
             }
 
             function buildGateOverlay() {
@@ -325,11 +349,12 @@
                         <div class="gate-qr"><img src="${QR_IMG}" alt="二维码"></div>
                         <div class="gate-progress"><span id="gateProgressText"></span></div>
                         <div class="gate-bar"><div id="gateBarInner" class="gate-bar-inner"></div></div>
+                        <div id="gateStatus" class="gate-status" style="display: none; margin: 8px 0; padding: 8px; background: #f0f8ff; border-radius: 8px; font-size: 13px; color: #0066cc;"></div>
                         <div class="gate-buttons">
-                            <button id="btnShareQQ" class="btn btn-primary">去分享</button>
+                            <button id="btnShareQQ" class="btn btn-primary">尝试QQ分享</button>
                             <button id="btnIShared" class="btn btn-secondary">我已分享</button>
                         </div>
-                        <div class="gate-tip">若无法调起分享，请手动保存二维码发给好友</div>
+                        <div class="gate-tip">💡 点击"尝试QQ分享"后，如果无法调起分享面板，请手动保存二维码图片发给好友，然后点击"我已分享"</div>
                     </div>
                 `;
                 document.body.appendChild(overlay);
