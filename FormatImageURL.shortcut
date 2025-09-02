@@ -1,0 +1,35 @@
+{
+  "WFWorkflowClientVersion": "2.2",
+  "WFWorkflowActions": [
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.getclipboard",
+      "WFWorkflowActionParameters": {}
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.text.split",
+      "WFWorkflowActionParameters": {
+        "WFTextActionSplitTextBy": "\n"
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.repeat",
+      "WFWorkflowActionParameters": {
+        "WFRepeatCount": 0
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.text.combine",
+      "WFWorkflowActionParameters": {
+        "WFTextActionCombineSeparator": "\n"
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.setclipboard",
+      "WFWorkflowActionParameters": {}
+    }
+  ],
+  "WFWorkflowImportQuestions": [],
+  "WFWorkflowInputContentItemClasses": ["WFContentItemText"],
+  "WFWorkflowTypes": ["WatchKit"],
+  "WFWorkflowClientRelease": "720"
+}
