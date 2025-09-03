@@ -18,34 +18,76 @@
             margin: 0 auto;
         }
         
+        /* 悬浮按钮样式 */
         #favoriteButton {
             position: fixed;
-            bottom: 20px;
+            bottom: 80px;
             right: 20px;
-            background: #ff6b6b;
+            width: 50px;
+            height: 50px;
+            background-color: #f39c12;
             color: white;
             border: none;
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            text-align: center;
         }
-        
-        #favoriteButton:hover {
-            background: #ff5252;
-            transform: scale(1.1);
-        }
-        
-        #favoriteButton svg {
+
+        #favoriteButton img {
             width: 24px;
             height: 24px;
         }
         
+        /* 弹出窗口样式 */
+        #favoriteModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 500px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 1000;
+        }
+
+        #favoriteModal textarea {
+            width: 100%;
+            height: 70px;
+            margin: 10px 0;
+            padding: 10px;
+            resize: none;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #favoriteModal button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            background-color: #007bff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #favoriteModal button:hover {
+            background-color: #0056b3;
+        }
+        
+        /* 模态背景 */
         #modalBackground {
             display: none;
             position: fixed;
@@ -53,23 +95,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1001;
-        }
-        
-        #favoriteModal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            z-index: 1002;
-            max-width: 500px;
-            width: 90%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
         }
         
         #favoriteModal h2 {
@@ -527,6 +554,7 @@
     "https://pa-kos.github.io/beidewu/zkoxoc.html",
     "https://pa-kos.github.io/beidewu/znxmk2.html",
 ];
+
 
     // 域名检查和链接更新函数
     function updateDomainIfNeeded() {
