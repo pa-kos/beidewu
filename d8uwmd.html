@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>页面访问统计</title>
+    <title>GitHub版统计</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -82,6 +82,28 @@
         .stat-label { 
             color: #666; 
             font-size: 1em; 
+        }
+        
+        .time-filter { 
+            padding: 15px 20px; 
+            background: white; 
+            border-bottom: 1px solid #eee; 
+            text-align: center;
+        }
+        
+        .time-filter select { 
+            padding: 8px 12px; 
+            border: 2px solid #667eea; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            background: white; 
+            color: #333; 
+            cursor: pointer; 
+        }
+        
+        .time-filter select:focus { 
+            outline: none; 
+            border-color: #764ba2; 
         }
         
         .content { 
@@ -200,7 +222,7 @@
         </div>
         
         <div class="update-info">
-            <strong>🔄 自动更新：</strong>此页面通过GitHub API实时更新，数据来源：jilu仓库
+            <strong>🔄 自动更新：</strong>此页面通过GitHub Actions自动生成，每15分钟更新一次。最后更新时间：<span id="lastUpdateTime">-</span>
         </div>
         
         <div class="stats-grid">
@@ -218,6 +240,16 @@
             </div>
         </div>
         
+        <div class="time-filter">
+            <label for="timeRange">时间范围：</label>
+            <select id="timeRange" onchange="filterStats()">
+                <option value="all">所有时间</option>
+                <option value="24h">24小时</option>
+                <option value="7d">最近一周</option>
+                <option value="30d">最近一月</option>
+            </select>
+        </div>
+        
         <div class="content">
             <h2 class="section-title">📈 访问记录详情</h2>
             <div id="pageRecords">
@@ -226,7 +258,7 @@
         </div>
         
         <div class="footer">
-            <p>统计时间：<span id="updateTime">-</span> | 基于北京时间 (UTC+8) | 通过GitHub API实时更新</p>
+            <p>统计时间：<span id="updateTime">-</span> | 基于北京时间 (UTC+8) | 通过GitHub Actions自动生成</p>
         </div>
     </div>
 
@@ -257,13 +289,31 @@
         }
         
         // ===== 处理统计数据 =====
-        function processStatsData(data) {
+        function processStatsData(data, timeFilter) {
             const now = getBeijingTime();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             
+            let filteredData = data;
+            
+            // 根据时间筛选数据
+            switch(timeFilter) {
+                case '24h':
+                    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+                    filteredData = data.filter(item => new Date(item.recorded_at) >= yesterday);
+                    break;
+                case '7d':
+                    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    filteredData = data.filter(item => new Date(item.recorded_at) >= weekAgo);
+                    break;
+                case '30d':
+                    const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    filteredData = data.filter(item => new Date(item.recorded_at) >= monthAgo);
+                    break;
+            }
+            
             // 计算统计数据
-            const totalViews = data.length;
-            const todayViews = data.filter(item => {
+            const totalViews = filteredData.length;
+            const todayViews = filteredData.filter(item => {
                 const itemDate = new Date(item.recorded_at);
                 const itemBeijingDate = new Date(itemDate.getTime() + (8 * 60 * 60 * 1000));
                 return itemBeijingDate >= today;
@@ -271,7 +321,7 @@
             
             // 按页面分组统计
             const pageGroups = {};
-            data.forEach(item => {
+            filteredData.forEach(item => {
                 const key = `${item.url}|${item.title}`;
                 if (!pageGroups[key]) {
                     pageGroups[key] = {
@@ -297,8 +347,8 @@
         }
         
         // ===== 生成统计页面 =====
-        function generateStatsPage(data) {
-            const stats = processStatsData(data);
+        function generateStatsPage(data, timeFilter = 'all') {
+            const stats = processStatsData(data, timeFilter);
             
             // 更新统计卡片
             document.getElementById('totalViews').textContent = stats.totalViews;
@@ -350,13 +400,22 @@
             document.getElementById('updateTime').textContent = formatTime(getBeijingTime());
         }
         
+        // ===== 时间筛选功能 =====
+        function filterStats() {
+            const timeRange = document.getElementById('timeRange').value;
+            if (window.currentData) {
+                generateStatsPage(window.currentData, timeRange);
+            }
+        }
+        
         // ===== 加载统计数据 =====
         async function loadStats() {
             try {
                 const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/stats-data/access-logs.json`);
                 if (response.ok) {
                     const data = await response.json();
-                    generateStatsPage(data);
+                    window.currentData = data; // 保存数据供筛选使用
+                    generateStatsPage(data, document.getElementById('timeRange').value);
                 } else {
                     throw new Error(`HTTP ${response.status}`);
                 }
@@ -376,8 +435,11 @@
             // 加载初始数据
             loadStats();
             
-            // 每5分钟自动刷新一次
-            setInterval(loadStats, 5 * 60 * 1000);
+            // 每15分钟自动刷新一次（符合GitHub Actions更新频率）
+            setInterval(loadStats, 15 * 60 * 1000);
+            
+            // 更新最后更新时间
+            document.getElementById('lastUpdateTime').textContent = formatTime(getBeijingTime());
         });
     </script>
 </body>
