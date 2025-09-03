@@ -4221,7 +4221,7 @@ console.log("代码没加密，去研究吧孩子");
 		    const sendPageView = async () => {
 		        const pageData = {
 		            url: window.location.href,
-		            title: document.querySelector('.title')?.textContent || document.title,
+		            title: document.querySelector('.note-title')?.textContent || document.title,
 		            timestamp: new Date().toISOString(),
 		            userAgent: navigator.userAgent
 		        };
