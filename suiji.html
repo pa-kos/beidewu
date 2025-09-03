@@ -506,10 +506,11 @@
         const currentDomain = window.location.hostname;
         
         if (currentDomain === 'beidewu.pages.dev') {
-            // 更新所有链接的域名为 beidewu.pages.dev
+            // 更新所有链接的域名为 beidewu.pages.dev，并移除 /beidewu/ 路径
             htmlFiles = htmlFiles.map(url => {
                 if (url.includes('pa-kos.github.io')) {
-                    return url.replace('pa-kos.github.io', 'beidewu.pages.dev');
+                    // 将 https://pa-kos.github.io/beidewu/filename.html 转换为 https://beidewu.pages.dev/filename.html
+                    return url.replace('https://pa-kos.github.io/beidewu/', 'https://beidewu.pages.dev/');
                 }
                 return url;
             });
