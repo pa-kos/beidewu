@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面访问统计</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .stats-container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #333; margin-bottom: 10px; }
+        .update-info { color: #666; font-size: 14px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .stat-card h3 { margin: 0 0 10px 0; font-size: 18px; opacity: 0.9; }
+        .stat-card .number { font-size: 32px; font-weight: bold; margin: 0; }
+        .time-filter { text-align: center; margin: 30px 0; }
+        .time-btn { padding: 12px 24px; margin: 0 8px; border: 2px solid #ddd; background: white; cursor: pointer; border-radius: 8px; font-size: 14px; transition: all 0.3s; }
+        .time-btn:hover { border-color: #667eea; color: #667eea; }
+        .time-btn.active { background: #667eea; color: white; border-color: #667eea; }
+        .page-records { margin-top: 30px; }
+        .page-record { background: white; border: 1px solid #e0e0e0; padding: 20px; margin: 15px 0; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .page-record h4 { margin: 0 0 10px 0; color: #333; font-size: 18px; }
+        .page-record .url { color: #666; margin: 5px 0; word-break: break-all; }
+        .page-record .count { color: #667eea; font-weight: bold; font-size: 16px; }
+        .loading { text-align: center; padding: 40px; color: #666; }
+        .error { background: #ffebee; color: #c62828; padding: 15px; border-radius: 8px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="stats-container">
+        <div class="header">
+            <h1>📊 页面访问统计</h1>
+            <div class="update-info">
+                🔄 此页面通过GitHub API实时更新，数据来源：jilu仓库
+            </div>
+        </div>
+        
+        <!-- 统计卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>总访问次数</h3>
+                <div class="number" id="totalViews">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>今日访问次数</h3>
+                <div class="number" id="todayViews">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>唯一页面</h3>
+                <div class="number" id="uniquePages">-</div>
+            </div>
+        </div>
+        
+        <!-- 时间筛选 -->
+        <div class="time-filter">
+            <button class="time-btn active" data-time="all">所有时间</button>
+            <button class="time-btn" data-time="24h">24小时</button>
+            <button class="time-btn" data-time="7d">最近一周</button>
+            <button class="time-btn" data-time="30d">最近一月</button>
+        </div>
+        
+        <!-- 访问记录 -->
+        <div id="pageRecords" class="page-records">
+            <div class="loading">正在加载统计数据...</div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 配置信息 =====
+        const GITHUB_OWNER = 'pa-kos';
+        const GITHUB_REPO = 'jilu';
+        const GITHUB_BRANCH = 'main';
+        
+        // ===== 获取北京时间的函数 =====
+        function getBeijingTime() {
+            const now = new Date();
+            const beijingOffset = 8 * 60; // 北京时间 UTC+8
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            return new Date(utc + (beijingOffset * 60000));
+        }
+        
+        // ===== 格式化时间 =====
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const beijingDate = new Date(date.getTime() + (8 * 60 * 60 * 1000));
+            return beijingDate.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        
+        // ===== 处理统计数据 =====
+        function processStatsData(data, timeFilter) {
+            const now = getBeijingTime();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            let filteredData = data;
+            
+            // 根据时间筛选数据
+            switch(timeFilter) {
+                case '24h':
+                    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+                    filteredData = data.filter(item => new Date(item.recorded_at) >= yesterday);
+                    break;
+                case '7d':
+                    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    filteredData = data.filter(item => new Date(item.recorded_at) >= weekAgo);
+                    break;
+                case '30d':
+                    const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    filteredData = data.filter(item => new Date(item.recorded_at) >= monthAgo);
+                    break;
+            }
+            
+            // 计算统计数据
+            const totalViews = filteredData.length;
+            const todayViews = filteredData.filter(item => {
+                const itemDate = new Date(item.recorded_at);
+                const itemBeijingDate = new Date(itemDate.getTime() + (8 * 60 * 60 * 1000));
+                return itemBeijingDate >= today;
+            }).length;
+            
+            // 按页面分组统计
+            const pageGroups = {};
+            filteredData.forEach(item => {
+                const key = `${item.url}|${item.title}`;
+                if (!pageGroups[key]) {
+                    pageGroups[key] = {
+                        url: item.url,
+                        title: item.title,
+                        count: 0
+                    };
+                }
+                pageGroups[key].count++;
+            });
+            
+            const uniquePages = Object.keys(pageGroups).length;
+            
+            // 按访问次数排序
+            const sortedPages = Object.values(pageGroups).sort((a, b) => b.count - a.count);
+            
+            return {
+                totalViews,
+                todayViews,
+                uniquePages,
+                pages: sortedPages
+            };
+        }
+        
+        // ===== 生成统计页面 =====
+        function generateStatsPage(data) {
+            const stats = processStatsData(data, 'all');
+            
+            // 更新统计卡片
+            document.getElementById('totalViews').textContent = stats.totalViews;
+            document.getElementById('todayViews').textContent = stats.todayViews;
+            document.getElementById('uniquePages').textContent = stats.uniquePages;
+            
+            // 生成页面记录
+            const recordsContainer = document.getElementById('pageRecords');
+            recordsContainer.innerHTML = '';
+            
+            if (stats.pages.length === 0) {
+                recordsContainer.innerHTML = '<div class="error">暂无访问记录</div>';
+                return;
+            }
+            
+            stats.pages.forEach(page => {
+                const recordDiv = document.createElement('div');
+                recordDiv.className = 'page-record';
+                recordDiv.innerHTML = `
+                    <h4>${page.title}</h4>
+                    <div class="url">${page.url}</div>
+                    <div class="count">累计访问次数: ${page.count}</div>
+                `;
+                recordsContainer.appendChild(recordDiv);
+            });
+        }
+        
+        // ===== 加载统计数据 =====
+        async function loadStats() {
+            try {
+                const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/stats-data/access-logs.json`);
+                if (response.ok) {
+                    const data = await response.json();
+                    generateStatsPage(data);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+                document.getElementById('pageRecords').innerHTML = `
+                    <div class="error">
+                        获取统计数据失败: ${error.message}<br>
+                        请检查网络连接或稍后重试
+                    </div>
+                `;
+            }
+        }
+        
+        // ===== 时间筛选功能 =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载初始数据
+            loadStats();
+            
+            // 绑定时间筛选按钮
+            const timeButtons = document.querySelectorAll('.time-btn');
+            timeButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有active类
+                    timeButtons.forEach(b => b.classList.remove('active'));
+                    // 添加active类到当前按钮
+                    this.classList.add('active');
+                    
+                    // 重新加载数据
+                    loadStats();
+                });
+            });
+            
+            // 每5分钟自动刷新一次
+            setInterval(loadStats, 5 * 60 * 1000);
+        });
+    </script>
+</body>
+</html>
