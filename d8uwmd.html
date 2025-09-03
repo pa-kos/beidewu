@@ -135,9 +135,20 @@
         .url-cell { 
             max-width: 250px; 
             word-break: break-all; 
-            color: #666;
+            color: #0066cc;
             font-family: monospace;
             font-size: 13px;
+        }
+        
+        .url-cell a {
+            color: #0066cc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .url-cell a:hover {
+            color: #003366;
+            text-decoration: underline;
         }
         
         .count-cell { 
@@ -154,6 +165,20 @@
             background: #f8f9fa; 
             border-top: 1px solid #eee; 
             font-size: 13px;
+        }
+        
+        .loading { 
+            text-align: center; 
+            padding: 40px; 
+            color: #666; 
+        }
+        
+        .error { 
+            background: #ffebee; 
+            color: #c62828; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 20px 0; 
         }
         
         @media (max-width: 768px) { 
@@ -175,67 +200,185 @@
         </div>
         
         <div class="update-info">
-            <strong>🔄 自动更新：</strong>此页面通过GitHub Actions自动生成，每15分钟更新一次。最后更新时间：2025/9/3 04:07:51
+            <strong>🔄 自动更新：</strong>此页面通过GitHub API实时更新，数据来源：jilu仓库
         </div>
         
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-number">7</div>
+                <div class="stat-number" id="totalViews">-</div>
                 <div class="stat-label">总访问次数</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">7</div>
+                <div class="stat-number" id="todayViews">-</div>
                 <div class="stat-label">今日访问次数</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">5</div>
+                <div class="stat-number" id="uniquePages">-</div>
                 <div class="stat-label">唯一页面</div>
             </div>
         </div>
         
         <div class="content">
             <h2 class="section-title">📈 访问记录详情</h2>
-            <table class="stats-table">
-                <thead>
-                    <tr>
-                        <th>页面标题</th>
-                        <th>页面URL</th>
-                        <th>访问次数</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="title-cell">GitHub Pages统计页面</td>
-                        <td class="url-cell">https://pa-kos.github.io/page-stats</td>
-                        <td class="count-cell">3</td>
-                    </tr>
-                    <tr>
-                        <td class="title-cell">测试页面1</td>
-                        <td class="url-cell">https://example.com/test1</td>
-                        <td class="count-cell">1</td>
-                    </tr>
-                    <tr>
-                        <td class="title-cell">测试页面2</td>
-                        <td class="url-cell">https://example.com/test2</td>
-                        <td class="count-cell">1</td>
-                    </tr>
-                    <tr>
-                        <td class="title-cell">测试页面3</td>
-                        <td class="url-cell">https://example.com/test3</td>
-                        <td class="count-cell">1</td>
-                    </tr>
-                    <tr>
-                        <td class="title-cell">测试页面访问统计</td>
-                        <td class="url-cell">https://example.com/test</td>
-                        <td class="count-cell">1</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div id="pageRecords">
+                <div class="loading">正在加载统计数据...</div>
+            </div>
         </div>
         
         <div class="footer">
-            <p>统计时间：2025/9/3 04:07:51 | 基于北京时间 (UTC+8) | 通过GitHub Actions自动生成</p>
+            <p>统计时间：<span id="updateTime">-</span> | 基于北京时间 (UTC+8) | 通过GitHub API实时更新</p>
         </div>
     </div>
+
+    <script>
+        // ===== 配置信息 =====
+        const GITHUB_OWNER = 'pa-kos';
+        const GITHUB_REPO = 'jilu';
+        const GITHUB_BRANCH = 'main';
+        
+        // ===== 获取北京时间的函数 =====
+        function getBeijingTime() {
+            const now = new Date();
+            const beijingOffset = 8 * 60; // 北京时间 UTC+8
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            return new Date(utc + (beijingOffset * 60000));
+        }
+        
+        // ===== 格式化时间 =====
+        function formatTime(date) {
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        
+        // ===== 处理统计数据 =====
+        function processStatsData(data) {
+            const now = getBeijingTime();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            // 计算统计数据
+            const totalViews = data.length;
+            const todayViews = data.filter(item => {
+                const itemDate = new Date(item.recorded_at);
+                const itemBeijingDate = new Date(itemDate.getTime() + (8 * 60 * 60 * 1000));
+                return itemBeijingDate >= today;
+            }).length;
+            
+            // 按页面分组统计
+            const pageGroups = {};
+            data.forEach(item => {
+                const key = `${item.url}|${item.title}`;
+                if (!pageGroups[key]) {
+                    pageGroups[key] = {
+                        url: item.url,
+                        title: item.title,
+                        count: 0
+                    };
+                }
+                pageGroups[key].count++;
+            });
+            
+            const uniquePages = Object.keys(pageGroups).length;
+            
+            // 按访问次数排序
+            const sortedPages = Object.values(pageGroups).sort((a, b) => b.count - a.count);
+            
+            return {
+                totalViews,
+                todayViews,
+                uniquePages,
+                pages: sortedPages
+            };
+        }
+        
+        // ===== 生成统计页面 =====
+        function generateStatsPage(data) {
+            const stats = processStatsData(data);
+            
+            // 更新统计卡片
+            document.getElementById('totalViews').textContent = stats.totalViews;
+            document.getElementById('todayViews').textContent = stats.todayViews;
+            document.getElementById('uniquePages').textContent = stats.uniquePages;
+            
+            // 生成页面记录
+            const recordsContainer = document.getElementById('pageRecords');
+            recordsContainer.innerHTML = '';
+            
+            if (stats.pages.length === 0) {
+                recordsContainer.innerHTML = '<div class="error">暂无访问记录</div>';
+                return;
+            }
+            
+            // 创建表格
+            const table = document.createElement('table');
+            table.className = 'stats-table';
+            
+            // 表头
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr>
+                    <th>页面标题</th>
+                    <th>页面URL</th>
+                    <th>访问次数</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+            
+            // 表体
+            const tbody = document.createElement('tbody');
+            stats.pages.forEach(page => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="title-cell">${page.title}</td>
+                    <td class="url-cell">
+                        <a href="${page.url}" target="_blank" rel="noopener noreferrer">${page.url}</a>
+                    </td>
+                    <td class="count-cell">${page.count}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+            
+            recordsContainer.appendChild(table);
+            
+            // 更新时间
+            document.getElementById('updateTime').textContent = formatTime(getBeijingTime());
+        }
+        
+        // ===== 加载统计数据 =====
+        async function loadStats() {
+            try {
+                const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/stats-data/access-logs.json`);
+                if (response.ok) {
+                    const data = await response.json();
+                    generateStatsPage(data);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+                document.getElementById('pageRecords').innerHTML = `
+                    <div class="error">
+                        获取统计数据失败: ${error.message}<br>
+                        请检查网络连接或稍后重试
+                    </div>
+                `;
+            }
+        }
+        
+        // ===== 页面加载完成后执行 =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载初始数据
+            loadStats();
+            
+            // 每5分钟自动刷新一次
+            setInterval(loadStats, 5 * 60 * 1000);
+        });
+    </script>
 </body>
 </html>
