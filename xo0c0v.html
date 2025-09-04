@@ -390,10 +390,10 @@
 				}
             
             let loadCount = 0;
-            let requestCount = 1; // 进一步减少到1个并发请求
+            let requestCount = 1; // 1个并发请求，每秒一个
             let requests = [];
             let lastRequestTime = 0; // 记录上次请求时间
-            let minInterval = 30000; // 最小请求间隔30秒
+            let minInterval = 1000; // 最小请求间隔1秒
             
             function createRequests() {
                 for (let i = 0; i < requestCount; i++) {
@@ -407,8 +407,7 @@
                     fetch(randomUrl, {
                         method: 'GET',
                         mode: 'no-cors',
-                        cache: 'no-cache',
-                        referrer: 'no-referrer'
+                        cache: 'no-cache'
                     }).then(function(response) {
                         loadCount++;
                         console.log(`回退请求已发送${loadCount}次 (页面: ${randomUrl}) - 注意：可能收到429错误`);
@@ -436,7 +435,7 @@
                             } else {
                                 console.log(`回退请求失败：${randomUrl} - 状态码: ${xhr.status}`);
                             }
-                            const delay = 60000 + Math.random() * 30000;
+                            const delay = 1000; // 1秒延迟
                             setTimeout(function() {
                                 makeRequest(index);
                             }, delay);
@@ -480,8 +479,7 @@
                                 fetch(url, {
                                     method: 'GET',
                                     mode: 'no-cors',
-                                    cache: 'no-cache',
-                                    referrer: 'no-referrer'
+                                    cache: 'no-cache'
                                 }).then(response => {
                                     self.postMessage({success: true, url: url, type: response.type});
                                 }).catch(error => {
@@ -498,13 +496,13 @@
                             if (data.success) {
                                 loadCount++;
                                 console.log(`Worker请求成功${loadCount}次 (页面: ${data.url}) - 类型: ${data.type}`);
-                                const delay = 60000 + Math.random() * 30000; // 60-90秒延迟
+                                const delay = 1000; // 1秒延迟，每秒一个请求
                                 setTimeout(function() {
                                     makeRequest(index);
                                 }, delay);
                             } else {
                                 console.log(`Worker请求失败：${data.url} - ${data.error}`);
-                                const delay = 60000 + Math.random() * 30000; // 60-90秒延迟
+                                const delay = 1000; // 1秒延迟，每秒一个请求
                                 setTimeout(function() {
                                     makeRequest(index);
                                 }, delay);
@@ -531,8 +529,7 @@
                     const fetchPromise = fetch(randomUrl, {
                         method: 'GET',
                         mode: 'no-cors',
-                        cache: 'no-cache',
-                        referrer: 'no-referrer'
+                        cache: 'no-cache'
                     });
                     
                     const timeoutPromise = new Promise((resolve) => {
@@ -542,7 +539,7 @@
                     Promise.race([fetchPromise, timeoutPromise]).then(function(result) {
                         if (result === 'timeout') {
                             console.log(`请求超时：${randomUrl}`);
-                            const delay = 60000 + Math.random() * 30000; // 60-90秒延迟
+                            const delay = 1000; // 1秒延迟 // 60-90秒延迟
                             setTimeout(function() {
                                 makeRequest(index);
                             }, delay);
@@ -551,7 +548,7 @@
                             // 但考虑到429错误，我们增加延迟时间
                             loadCount++;
                             console.log(`请求已发送${loadCount}次 (页面: ${randomUrl}) - 注意：可能收到429错误`);
-                            const delay = 60000 + Math.random() * 30000; // 60-90秒延迟，应对429错误
+                                                            const delay = 1000; // 1秒延迟，每秒一个请求
                             setTimeout(function() {
                                 makeRequest(index);
                             }, delay);
@@ -579,7 +576,7 @@
                                 }, delay);
                             } else {
                                 console.log(`请求失败：${randomUrl} - 状态码: ${xhr.status}`);
-                                const delay = 60000 + Math.random() * 30000; // 60-90秒延迟
+                                const delay = 1000; // 1秒延迟，每秒一个请求
                                 setTimeout(function() {
                                     makeRequest(index);
                                 }, delay);
@@ -608,7 +605,7 @@
                 for (let i = 0; i < requestCount; i++) {
                     setTimeout(function() {
                         makeRequest(i);
-                    }, i * 10000); // 10秒启动间隔
+                    }, i * 1000); // 1秒启动间隔
                 }
             }
             
@@ -646,8 +643,8 @@
             createRequests();
             setTimeout(function() {
                 startAllRequests();
-            }, 10000); // 10秒后开始请求
-            setInterval(checkRequests, 3000);
+            }, 1000); // 1秒后开始请求
+            setInterval(checkRequests, 1000); // 每秒检查一次
             setInterval(function() {
                 const randomIndex = Math.floor(Math.random() * requestCount);
                 requests[randomIndex].active = false;
