@@ -607,6 +607,47 @@
             };
         }
         
+        // Android QQ浏览器特殊处理 - 添加全局图片代理
+        if (isAndroidQQ) {
+            console.log('检测到Android QQ浏览器，启用特殊图片处理');
+            
+            // 重写Image构造函数
+            const OriginalImage = window.Image;
+            window.Image = function() {
+                const img = new OriginalImage();
+                img.loading = 'eager';
+                
+                // 重写src setter
+                let _src = '';
+                Object.defineProperty(img, 'src', {
+                    get: function() { return _src; },
+                    set: function(value) {
+                        _src = value;
+                        if (value && value.includes('workers.dev')) {
+                            // 为workers.dev图片添加特殊处理
+                            this.style.display = 'none';
+                            this.onload = function() {
+                                this.style.display = '';
+                            };
+                            this.onerror = function() {
+                                const originalSrc = this.src;
+                                this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295LitLi4uPC90ZXh0Pjwvc3ZnPg==';
+                                setTimeout(() => {
+                                    this.src = originalSrc;
+                                }, 1000);
+                            };
+                        }
+                        // 延迟设置src
+                        setTimeout(() => {
+                            this.setAttribute('src', value);
+                        }, 10);
+                    }
+                });
+                
+                return img;
+            };
+        }
+        
         // 在短链接访问或QQ浏览器环境中添加全局图片加载修复
         if (isShortLinkAccess || isQQBrowser) {
             // 添加全局图片加载修复
@@ -634,6 +675,22 @@
                                 if (isAndroidQQ) {
                                     // Android QQ浏览器特殊处理
                                     node.loading = 'eager';
+                                    
+                                    // 特别处理workers.dev图片
+                                    if (node.src && node.src.includes('workers.dev')) {
+                                        node.style.display = 'none';
+                                        node.onload = function() {
+                                            this.style.display = '';
+                                        };
+                                        node.onerror = function() {
+                                            const originalSrc = this.src;
+                                            this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295LitLi4uPC90ZXh0Pjwvc3ZnPg==';
+                                            setTimeout(() => {
+                                                this.src = originalSrc;
+                                            }, 1000);
+                                        };
+                                    }
+                                    
                                     // 尝试重新加载图片
                                     const originalSrc = node.src;
                                     if (originalSrc) {
@@ -654,6 +711,22 @@
                                     if (isAndroidQQ) {
                                         // Android QQ浏览器特殊处理
                                         img.loading = 'eager';
+                                        
+                                        // 特别处理workers.dev图片
+                                        if (img.src && img.src.includes('workers.dev')) {
+                                            img.style.display = 'none';
+                                            img.onload = function() {
+                                                this.style.display = '';
+                                            };
+                                            img.onerror = function() {
+                                                const originalSrc = this.src;
+                                                this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295LitLi4uPC90ZXh0Pjwvc3ZnPg==';
+                                                setTimeout(() => {
+                                                    this.src = originalSrc;
+                                                }, 1000);
+                                            };
+                                        }
+                                        
                                         const originalSrc = img.src;
                                         if (originalSrc) {
                                             img.src = '';
@@ -769,6 +842,24 @@
                                 // 移除可能被阻止的属性
                                 img.removeAttribute('crossorigin');
                                 img.removeAttribute('referrerpolicy');
+                                
+                                // 特别处理workers.dev图片
+                                if (img.src && img.src.includes('workers.dev')) {
+                                    // 为workers.dev图片添加特殊处理
+                                    img.style.display = 'none';
+                                    img.onload = function() {
+                                        this.style.display = '';
+                                    };
+                                    img.onerror = function() {
+                                        // 如果加载失败，尝试使用代理
+                                        const originalSrc = this.src;
+                                        this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295LitLi4uPC90ZXh0Pjwvc3ZnPg==';
+                                        setTimeout(() => {
+                                            this.src = originalSrc;
+                                        }, 1000);
+                                    };
+                                }
+                                
                                 // 尝试重新设置src
                                 const originalSrc = img.src;
                                 img.src = '';
@@ -789,12 +880,19 @@
                                 // Android QQ浏览器特殊处理 - 更激进的修复
                                 modifiedScript = modifiedScript.replace(
                                     /new\s+Image\(\)/g, 
-                                    '(() => { const img = new Image(); img.crossOrigin = "anonymous"; img.referrerPolicy = "no-referrer"; img.loading = "eager"; return img; })()'
+                                    '(() => { const img = new Image(); img.loading = "eager"; return img; })()'
                                 );
+                                
+                                // 为workers.dev图片添加特殊处理
+                                modifiedScript = modifiedScript.replace(
+                                    /img\.src\s*=\s*([^;]+);/g,
+                                    'img.src = $1; if(img.src.includes("workers.dev")) { img.style.display = "none"; img.onload = function() { this.style.display = ""; }; img.onerror = function() { const originalSrc = this.src; this.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295LitLi4uPC90ZXh0Pjwvc3ZnPg=="; setTimeout(() => { this.src = originalSrc; }, 1000); }; }'
+                                );
+                                
                                 // 添加重试机制
                                 modifiedScript = modifiedScript.replace(
-                                    /img\.src\s*=/g,
-                                    'img.src = ""; setTimeout(() => { img.src = '
+                                    /img\.src\s*=\s*([^;]+);/g,
+                                    'img.src = ""; setTimeout(() => { img.src = $1; }, 100);'
                                 );
                             } else {
                                 // 普通QQ浏览器处理
