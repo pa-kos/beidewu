@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>随机涩图</title>
+    <title>❤️随机涩图2.0</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -765,93 +765,177 @@
             referrerPolicy: 'no-referrer'
         } : {};
         
-        fetch(selectedFile + '?t=' + Date.now(), fetchOptions)
-            .then(response => {
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                return response.text();
-            })
-            .then(html => {
-                // 在QQ浏览器中预处理HTML内容，特别处理workers.dev图片
-                if (isQQBrowser) {
-                    // 只移除可能被QQ浏览器阻止的属性，不修改图片显示
-                    html = html.replace(/crossorigin="[^"]*"/gi, '');
-                    html = html.replace(/referrerpolicy="[^"]*"/gi, '');
+        // 在Android QQ浏览器中使用iframe加载页面
+        if (isAndroidQQ) {
+            console.log('Android QQ浏览器使用iframe加载页面');
+            
+            // 检查是否已经使用过iframe，如果是则继续使用
+            const existingIframe = contentDiv.querySelector('iframe');
+            if (existingIframe) {
+                existingIframe.src = selectedFile + '?t=' + Date.now();
+                return;
+            }
+            
+            // 清空内容区域
+            contentDiv.innerHTML = '';
+            
+            // 创建iframe
+            const iframe = document.createElement('iframe');
+            iframe.src = selectedFile + '?t=' + Date.now();
+            iframe.style.width = '100%';
+            iframe.style.height = '100vh';
+            iframe.style.border = 'none';
+            iframe.style.overflow = 'auto';
+            iframe.style.backgroundColor = 'white';
+            iframe.style.position = 'relative';
+            iframe.style.zIndex = '1';
+            
+            // 添加加载提示
+            const loadingDiv = document.createElement('div');
+            loadingDiv.style.position = 'absolute';
+            loadingDiv.style.top = '50%';
+            loadingDiv.style.left = '50%';
+            loadingDiv.style.transform = 'translate(-50%, -50%)';
+            loadingDiv.style.zIndex = '2';
+            loadingDiv.style.backgroundColor = 'rgba(255,255,255,0.9)';
+            loadingDiv.style.padding = '20px';
+            loadingDiv.style.borderRadius = '8px';
+            loadingDiv.style.fontSize = '16px';
+            loadingDiv.style.color = '#666';
+            loadingDiv.textContent = '页面加载中...';
+            contentDiv.appendChild(loadingDiv);
+            
+            // 添加加载完成事件
+            iframe.onload = function() {
+                console.log('iframe页面加载完成');
+                // 隐藏加载提示
+                if (loadingDiv && loadingDiv.parentNode) {
+                    loadingDiv.parentNode.removeChild(loadingDiv);
                 }
-                
-                // 完全保留原HTML结构（包括脚本）
-                contentDiv.innerHTML = html;
-                
-                // 确保初始链接保留
-                if (!contentDiv.querySelector('#xunlei')) {
-                    const originalLink = document.createElement('a');
-                    originalLink.id = 'xunlei';
-                    originalLink.href = 'https://xn--djr07sn3v.com';
-                    originalLink.textContent = '点我查看所有';
-                    contentDiv.appendChild(originalLink);
+            };
+            
+            // 添加错误处理
+            iframe.onerror = function() {
+                console.log('iframe页面加载失败，尝试普通方式');
+                // 移除iframe和加载提示
+                contentDiv.innerHTML = '';
+                // 继续执行普通的fetch方式
+                loadPageNormally();
+            };
+            
+            // 添加超时处理
+            setTimeout(() => {
+                if (loadingDiv && loadingDiv.parentNode) {
+                    console.log('iframe加载超时，尝试普通方式');
+                    contentDiv.innerHTML = '';
+                    loadPageNormally();
                 }
-                
-                // 在QQ浏览器中，只对workers.dev图片进行简单处理
-                if (isQQBrowser) {
-                    const allImages = contentDiv.querySelectorAll('img');
-                    allImages.forEach(img => {
-                        if (img.src && img.src.includes('workers.dev')) {
-                            console.log('检测到workers.dev图片:', img.src);
-                            // 只设置loading属性，让图片正常加载
-                            img.loading = 'eager';
-                        }
-                    });
-                }
-                
-                // 根据访问方式和浏览器环境决定图片加载策略
-                if (isShortLinkAccess || isQQBrowser) {
-                    // 简化图片处理，只移除可能被阻止的属性
-                    const images = contentDiv.querySelectorAll('img');
-                    images.forEach(img => {
-                        if (img.src) {
-                            // 移除可能被QQ浏览器阻止的属性
-                            img.removeAttribute('crossorigin');
-                            img.removeAttribute('referrerpolicy');
-                            // 设置loading属性
-                            img.loading = 'eager';
-                        }
-                    });
-                
-                // 执行动态图片加载
-                    const scripts = contentDiv.getElementsByTagName('script');
-                    for (let script of scripts) {
-                        if (script.textContent.includes('loadImage')) {
-                            let modifiedScript = script.textContent;
-                            
-                            if (isQQBrowser) {
-                                // QQ浏览器简单处理 - 只设置loading属性
-                                modifiedScript = modifiedScript.replace(
-                                    /new\s+Image\(\)/g, 
-                                    '(() => { const img = new Image(); img.loading = "eager"; return img; })()'
-                                );
-                            }
-                            
-                            new Function(modifiedScript)();
-                        }
+            }, 10000); // 10秒超时
+            
+            // 使用已定义的loadPageNormally函数
+            
+            contentDiv.appendChild(iframe);
+            return;
+        }
+        
+        // 普通加载方式的函数
+        function loadPageNormally() {
+            console.log('使用普通方式加载页面');
+            fetch(selectedFile + '?t=' + Date.now(), fetchOptions)
+                .then(response => {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    return response.text();
+                })
+                .then(html => {
+                    // 在QQ浏览器中预处理HTML内容，特别处理workers.dev图片
+                    if (isQQBrowser) {
+                        // 只移除可能被QQ浏览器阻止的属性，不修改图片显示
+                        html = html.replace(/crossorigin="[^"]*"/gi, '');
+                        html = html.replace(/referrerpolicy="[^"]*"/gi, '');
                     }
-                } else {
-                    // 直接访问时保持原有逻辑
+                    
+                    // 完全保留原HTML结构（包括脚本）
+                    contentDiv.innerHTML = html;
+                    executePostLoadTasks();
+                })
+                .catch(error => {
+                    console.error('页面加载失败:', error);
+                    contentDiv.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">页面加载失败，请重试</p>';
+                });
+        }
+        
+        // 执行页面加载后的任务
+        function executePostLoadTasks() {
+            // 确保初始链接保留
+            if (!contentDiv.querySelector('#xunlei')) {
+                const originalLink = document.createElement('a');
+                originalLink.id = 'xunlei';
+                originalLink.href = 'https://xn--djr07sn3v.com';
+                originalLink.textContent = '点我查看所有';
+                contentDiv.appendChild(originalLink);
+            }
+            
+            // 在QQ浏览器中，只对workers.dev图片进行简单处理
+            if (isQQBrowser) {
+                const allImages = contentDiv.querySelectorAll('img');
+                allImages.forEach(img => {
+                    if (img.src && img.src.includes('workers.dev')) {
+                        console.log('检测到workers.dev图片:', img.src);
+                        // 只设置loading属性，让图片正常加载
+                        img.loading = 'eager';
+                    }
+                });
+            }
+            
+            // 根据访问方式和浏览器环境决定图片加载策略
+            if (isShortLinkAccess || isQQBrowser) {
+                // 简化图片处理，只移除可能被阻止的属性
+                const images = contentDiv.querySelectorAll('img');
+                images.forEach(img => {
+                    if (img.src) {
+                        // 移除可能被QQ浏览器阻止的属性
+                        img.removeAttribute('crossorigin');
+                        img.removeAttribute('referrerpolicy');
+                        // 设置loading属性
+                        img.loading = 'eager';
+                    }
+                });
+            
+                // 执行动态图片加载
+                const scripts = contentDiv.getElementsByTagName('script');
+                for (let script of scripts) {
+                    if (script.textContent.includes('loadImage')) {
+                        let modifiedScript = script.textContent;
+                        
+                        if (isQQBrowser) {
+                            // QQ浏览器简单处理 - 只设置loading属性
+                            modifiedScript = modifiedScript.replace(
+                                /new\s+Image\(\)/g, 
+                                '(() => { const img = new Image(); img.loading = "eager"; return img; })()'
+                            );
+                        }
+                        
+                        new Function(modifiedScript)();
+                    }
+                }
+            } else {
+                // 直接访问时保持原有逻辑
                 const scripts = contentDiv.getElementsByTagName('script');
                 for (let script of scripts) {
                     if (script.textContent.includes('loadImage')) {
                         new Function(script.textContent)();
-                        }
                     }
                 }
-                
-                favoriteBtn.style.display = 'flex';
-                isLoading = false;
-            })
-            .catch(error => {
-                console.error('加载失败:', error);
-                htmlFiles = htmlFiles.filter(f => f !== selectedFile);
-                isLoading = false;
-                loadRandomPage();
-            });
+            }
+            
+            favoriteBtn.style.display = 'flex';
+            isLoading = false;
+        }
+        
+        // 对于非Android QQ浏览器，直接调用普通加载方式
+        if (!isAndroidQQ) {
+            loadPageNormally();
+        }
     }
         
         function showFavoriteModal() {
