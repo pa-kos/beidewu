@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>随机涩图2.0</title>
+    <title>随机涩图</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -606,38 +606,13 @@
                 return originalFetch.call(this, url, options);
             };
             
-            // 为QQ浏览器添加图片代理处理
+            // 为QQ浏览器添加简单的图片处理
             const originalCreateElement = document.createElement;
             document.createElement = function(tagName) {
                 const element = originalCreateElement.call(this, tagName);
                 if (tagName.toLowerCase() === 'img') {
-                    // 重写图片的src属性
-                    let _src = '';
-                    Object.defineProperty(element, 'src', {
-                        get: function() { return _src; },
-                        set: function(value) {
-                            _src = value;
-                            if (value && value.includes('workers.dev')) {
-                                // 为workers.dev图片添加特殊处理
-                                this.style.display = 'none';
-                                this.loading = 'eager';
-                                this.onload = function() {
-                                    this.style.display = '';
-                                };
-                                this.onerror = function() {
-                                    const originalSrc = this.src;
-                                    this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295LitLi4uPC90ZXh0Pjwvc3ZnPg==';
-                                    setTimeout(() => {
-                                        this.src = originalSrc;
-                                    }, 1000);
-                                };
-                            }
-                            // 延迟设置src
-                            setTimeout(() => {
-                                this.setAttribute('src', value);
-                            }, 10);
-                        }
-                    });
+                    // 只设置loading属性，不重写src
+                    element.loading = 'eager';
                 }
                 return element;
             };
@@ -708,72 +683,18 @@
                     mutation.addedNodes.forEach(function(node) {
                         if (node.nodeType === 1) { // Element node
                             if (node.tagName === 'IMG') {
-                                if (isAndroidQQ) {
-                                    // Android QQ浏览器特殊处理
-                                    node.loading = 'eager';
-                                    
-                                    // 特别处理workers.dev图片
-                                    if (node.src && node.src.includes('workers.dev')) {
-                                        node.style.display = 'none';
-                                        node.onload = function() {
-                                            this.style.display = '';
-                                        };
-                                        node.onerror = function() {
-                                            const originalSrc = this.src;
-                                            this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295LitLi4uPC90ZXh0Pjwvc3ZnPg==';
-                                            setTimeout(() => {
-                                                this.src = originalSrc;
-                                            }, 1000);
-                                        };
-                                    }
-                                    
-                                    // 尝试重新加载图片
-                                    const originalSrc = node.src;
-                                    if (originalSrc) {
-                                        node.src = '';
-                                        setTimeout(() => {
-                                            node.src = originalSrc;
-                                        }, 50);
-                                    }
-                                } else {
-                                    node.crossOrigin = 'anonymous';
-                                    node.referrerPolicy = 'no-referrer';
-                                }
+                                // 简化处理，只设置loading属性
+                                node.loading = 'eager';
+                                node.removeAttribute('crossorigin');
+                                node.removeAttribute('referrerpolicy');
                             }
                             // 检查子元素中的图片
                             const images = node.querySelectorAll && node.querySelectorAll('img');
                             if (images) {
                                 images.forEach(img => {
-                                    if (isAndroidQQ) {
-                                        // Android QQ浏览器特殊处理
-                                        img.loading = 'eager';
-                                        
-                                        // 特别处理workers.dev图片
-                                        if (img.src && img.src.includes('workers.dev')) {
-                                            img.style.display = 'none';
-                                            img.onload = function() {
-                                                this.style.display = '';
-                                            };
-                                            img.onerror = function() {
-                                                const originalSrc = this.src;
-                                                this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295LitLi4uPC90ZXh0Pjwvc3ZnPg==';
-                                                setTimeout(() => {
-                                                    this.src = originalSrc;
-                                                }, 1000);
-                                            };
-                                        }
-                                        
-                                        const originalSrc = img.src;
-                                        if (originalSrc) {
-                                            img.src = '';
-                                            setTimeout(() => {
-                                                img.src = originalSrc;
-                                            }, 50);
-                                        }
-                                    } else {
-                                        img.crossOrigin = 'anonymous';
-                                        img.referrerPolicy = 'no-referrer';
-                                    }
+                                    img.loading = 'eager';
+                                    img.removeAttribute('crossorigin');
+                                    img.removeAttribute('referrerpolicy');
                                 });
                             }
                         }
@@ -852,13 +773,7 @@
             .then(html => {
                 // 在QQ浏览器中预处理HTML内容，特别处理workers.dev图片
                 if (isQQBrowser) {
-                    // 为workers.dev图片添加特殊属性
-                    html = html.replace(
-                        /<img([^>]*src="[^"]*workers\.dev[^"]*"[^>]*)>/gi,
-                        '<img$1 loading="eager" style="display:none;" onload="this.style.display=\'\';" onerror="this.src=\'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295LitLi4uPC90ZXh0Pjwvc3ZnPg==\'; setTimeout(() => { this.src = \'$&\'; }, 1000);">'
-                    );
-                    
-                    // 移除可能被QQ浏览器阻止的属性
+                    // 只移除可能被QQ浏览器阻止的属性，不修改图片显示
                     html = html.replace(/crossorigin="[^"]*"/gi, '');
                     html = html.replace(/referrerpolicy="[^"]*"/gi, '');
                 }
@@ -875,107 +790,43 @@
                     contentDiv.appendChild(originalLink);
                 }
                 
-                // 在QQ浏览器中，对所有workers.dev图片进行特殊处理
+                // 在QQ浏览器中，只对workers.dev图片进行简单处理
                 if (isQQBrowser) {
                     const allImages = contentDiv.querySelectorAll('img');
                     allImages.forEach(img => {
                         if (img.src && img.src.includes('workers.dev')) {
-                            // 重新设置图片属性
-                            img.style.display = 'none';
+                            console.log('检测到workers.dev图片:', img.src);
+                            // 只设置loading属性，让图片正常加载
                             img.loading = 'eager';
-                            img.onload = function() {
-                                this.style.display = '';
-                            };
-                            img.onerror = function() {
-                                const originalSrc = this.src;
-                                this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295LitLi4uPC90ZXh0Pjwvc3ZnPg==';
-                                setTimeout(() => {
-                                    this.src = originalSrc;
-                                }, 1000);
-                            };
-                            // 重新设置src以触发加载
-                            const originalSrc = img.src;
-                            img.src = '';
-                            setTimeout(() => {
-                                img.src = originalSrc;
-                            }, 100);
                         }
                     });
                 }
                 
                 // 根据访问方式和浏览器环境决定图片加载策略
                 if (isShortLinkAccess || isQQBrowser) {
-                    // 修复图片加载问题 - 添加跨域和referrer策略
+                    // 简化图片处理，只移除可能被阻止的属性
                     const images = contentDiv.querySelectorAll('img');
                     images.forEach(img => {
                         if (img.src) {
-                            // 为图片添加跨域属性
-                            img.crossOrigin = 'anonymous';
-                            // 移除可能的referrer限制
-                            img.referrerPolicy = 'no-referrer';
-                            
-                            // Android QQ浏览器特殊处理
-                            if (isAndroidQQ) {
-                                // 移除可能被阻止的属性
-                                img.removeAttribute('crossorigin');
-                                img.removeAttribute('referrerpolicy');
-                                
-                                // 特别处理workers.dev图片
-                                if (img.src && img.src.includes('workers.dev')) {
-                                    // 为workers.dev图片添加特殊处理
-                                    img.style.display = 'none';
-                                    img.onload = function() {
-                                        this.style.display = '';
-                                    };
-                                    img.onerror = function() {
-                                        // 如果加载失败，尝试使用代理
-                                        const originalSrc = this.src;
-                                        this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295LitLi4uPC90ZXh0Pjwvc3ZnPg==';
-                                        setTimeout(() => {
-                                            this.src = originalSrc;
-                                        }, 1000);
-                                    };
-                                }
-                                
-                                // 尝试重新设置src
-                                const originalSrc = img.src;
-                                img.src = '';
-                                setTimeout(() => {
-                                    img.src = originalSrc;
-                                }, 100);
-                            }
+                            // 移除可能被QQ浏览器阻止的属性
+                            img.removeAttribute('crossorigin');
+                            img.removeAttribute('referrerpolicy');
+                            // 设置loading属性
+                            img.loading = 'eager';
                         }
                     });
-                    
-                    // 执行动态图片加载
+                
+                // 执行动态图片加载
                     const scripts = contentDiv.getElementsByTagName('script');
                     for (let script of scripts) {
                         if (script.textContent.includes('loadImage')) {
                             let modifiedScript = script.textContent;
                             
-                            if (isAndroidQQ) {
-                                // Android QQ浏览器特殊处理 - 更激进的修复
+                            if (isQQBrowser) {
+                                // QQ浏览器简单处理 - 只设置loading属性
                                 modifiedScript = modifiedScript.replace(
                                     /new\s+Image\(\)/g, 
                                     '(() => { const img = new Image(); img.loading = "eager"; return img; })()'
-                                );
-                                
-                                // 为workers.dev图片添加特殊处理
-                                modifiedScript = modifiedScript.replace(
-                                    /img\.src\s*=\s*([^;]+);/g,
-                                    'img.src = $1; if(img.src.includes("workers.dev")) { img.style.display = "none"; img.onload = function() { this.style.display = ""; }; img.onerror = function() { const originalSrc = this.src; this.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295LitLi4uPC90ZXh0Pjwvc3ZnPg=="; setTimeout(() => { this.src = originalSrc; }, 1000); }; }'
-                                );
-                                
-                                // 添加重试机制
-                                modifiedScript = modifiedScript.replace(
-                                    /img\.src\s*=\s*([^;]+);/g,
-                                    'img.src = ""; setTimeout(() => { img.src = $1; }, 100);'
-                                );
-                            } else {
-                                // 普通QQ浏览器处理
-                                modifiedScript = modifiedScript.replace(
-                                    /new\s+Image\(\)/g, 
-                                    '(() => { const img = new Image(); img.crossOrigin = "anonymous"; img.referrerPolicy = "no-referrer"; return img; })()'
                                 );
                             }
                             
@@ -984,10 +835,10 @@
                     }
                 } else {
                     // 直接访问时保持原有逻辑
-                    const scripts = contentDiv.getElementsByTagName('script');
-                    for (let script of scripts) {
-                        if (script.textContent.includes('loadImage')) {
-                            new Function(script.textContent)();
+                const scripts = contentDiv.getElementsByTagName('script');
+                for (let script of scripts) {
+                    if (script.textContent.includes('loadImage')) {
+                        new Function(script.textContent)();
                         }
                     }
                 }
