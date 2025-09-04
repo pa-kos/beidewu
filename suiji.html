@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>随机涩图</title>
+    <title>随机涩图2.0</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -585,8 +585,27 @@
         const isShortLinkAccess = window.location.hostname !== 'pa-kos.github.io' && 
                                  window.location.hostname !== 'beidewu.pages.dev';
         
-        // 只有在短链接访问时才添加全局图片加载修复
-        if (isShortLinkAccess) {
+        // 检测QQ浏览器环境
+        const isQQBrowser = /QQ\//i.test(navigator.userAgent) || 
+                           /MQQBrowser/i.test(navigator.userAgent) ||
+                           /QQBrowser/i.test(navigator.userAgent);
+        
+        // 在QQ浏览器中禁用统计功能
+        if (isQQBrowser) {
+            console.log('检测到QQ浏览器环境，禁用统计功能');
+            // 重写fetch方法，阻止统计API调用
+            const originalFetch = window.fetch;
+            window.fetch = function(url, options) {
+                if (typeof url === 'string' && url.includes('tongji.xn--57qr98d7pm.com')) {
+                    console.log('QQ浏览器中阻止统计API调用:', url);
+                    return Promise.reject(new Error('QQ浏览器中禁用统计API'));
+                }
+                return originalFetch.call(this, url, options);
+            };
+        }
+        
+        // 在短链接访问或QQ浏览器环境中添加全局图片加载修复
+        if (isShortLinkAccess || isQQBrowser) {
             // 添加全局图片加载修复
             const originalCreateElement = document.createElement;
             document.createElement = function(tagName) {
@@ -669,6 +688,11 @@
         const isShortLinkAccess = window.location.hostname !== 'pa-kos.github.io' && 
                                  window.location.hostname !== 'beidewu.pages.dev';
         
+        // 检测QQ浏览器环境
+        const isQQBrowser = /QQ\//i.test(navigator.userAgent) || 
+                           /MQQBrowser/i.test(navigator.userAgent) ||
+                           /QQBrowser/i.test(navigator.userAgent);
+        
         const fetchOptions = isShortLinkAccess ? {
             mode: 'cors',
             credentials: 'omit',
@@ -693,8 +717,8 @@
                     contentDiv.appendChild(originalLink);
                 }
                 
-                // 只有在短链接访问时才修改图片属性
-                if (isShortLinkAccess) {
+                // 根据访问方式和浏览器环境决定图片加载策略
+                if (isShortLinkAccess || isQQBrowser) {
                     // 修复图片加载问题 - 添加跨域和referrer策略
                     const images = contentDiv.querySelectorAll('img');
                     images.forEach(img => {
@@ -705,8 +729,8 @@
                             img.referrerPolicy = 'no-referrer';
                         }
                     });
-                
-                // 执行动态图片加载
+                    
+                    // 执行动态图片加载
                     const scripts = contentDiv.getElementsByTagName('script');
                     for (let script of scripts) {
                         if (script.textContent.includes('loadImage')) {
@@ -720,10 +744,10 @@
                     }
                 } else {
                     // 直接访问时保持原有逻辑
-                const scripts = contentDiv.getElementsByTagName('script');
-                for (let script of scripts) {
-                    if (script.textContent.includes('loadImage')) {
-                        new Function(script.textContent)();
+                    const scripts = contentDiv.getElementsByTagName('script');
+                    for (let script of scripts) {
+                        if (script.textContent.includes('loadImage')) {
+                            new Function(script.textContent)();
                         }
                     }
                 }
