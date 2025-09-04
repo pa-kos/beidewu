@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>❤️随机涩图2.0</title>
+    <title>随机涩图</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -613,6 +613,24 @@
                 if (tagName.toLowerCase() === 'img') {
                     // 只设置loading属性，不重写src
                     element.loading = 'eager';
+                    
+                    // Android QQ浏览器特殊处理 - 监听src变化
+                    if (isAndroidQQ) {
+                        let _src = '';
+                        Object.defineProperty(element, 'src', {
+                            get: function() { return _src; },
+                            set: function(value) {
+                                _src = value;
+                                if (value && value.includes('workers.dev')) {
+                                    const proxyUrl = 'https://images.weserv.nl/?url=' + encodeURIComponent(value);
+                                    console.log('创建图片时替换URL:', value, '->', proxyUrl);
+                                    this.setAttribute('src', proxyUrl);
+                                } else {
+                                    this.setAttribute('src', value);
+                                }
+                            }
+                        });
+                    }
                 }
                 return element;
             };
@@ -683,6 +701,13 @@
                     mutation.addedNodes.forEach(function(node) {
                         if (node.nodeType === 1) { // Element node
                             if (node.tagName === 'IMG') {
+                                // Android QQ浏览器特殊处理 - 替换workers.dev图片
+                                if (isAndroidQQ && node.src && node.src.includes('workers.dev')) {
+                                    const proxyUrl = 'https://images.weserv.nl/?url=' + encodeURIComponent(node.src);
+                                    console.log('动态图片替换URL:', node.src, '->', proxyUrl);
+                                    node.src = proxyUrl;
+                                }
+                                
                                 // 简化处理，只设置loading属性
                                 node.loading = 'eager';
                                 node.removeAttribute('crossorigin');
@@ -692,6 +717,13 @@
                             const images = node.querySelectorAll && node.querySelectorAll('img');
                             if (images) {
                                 images.forEach(img => {
+                                    // Android QQ浏览器特殊处理 - 替换workers.dev图片
+                                    if (isAndroidQQ && img.src && img.src.includes('workers.dev')) {
+                                        const proxyUrl = 'https://images.weserv.nl/?url=' + encodeURIComponent(img.src);
+                                        console.log('动态子图片替换URL:', img.src, '->', proxyUrl);
+                                        img.src = proxyUrl;
+                                    }
+                                    
                                     img.loading = 'eager';
                                     img.removeAttribute('crossorigin');
                                     img.removeAttribute('referrerpolicy');
@@ -765,77 +797,49 @@
             referrerPolicy: 'no-referrer'
         } : {};
         
-        // 在Android QQ浏览器中使用iframe加载页面
+        // 在Android QQ浏览器中使用特殊处理
         if (isAndroidQQ) {
-            console.log('Android QQ浏览器使用iframe加载页面');
-            
-            // 检查是否已经使用过iframe，如果是则继续使用
-            const existingIframe = contentDiv.querySelector('iframe');
-            if (existingIframe) {
-                existingIframe.src = selectedFile + '?t=' + Date.now();
-                return;
-            }
-            
-            // 清空内容区域
-            contentDiv.innerHTML = '';
-            
-            // 创建iframe
-            const iframe = document.createElement('iframe');
-            iframe.src = selectedFile + '?t=' + Date.now();
-            iframe.style.width = '100%';
-            iframe.style.height = '100vh';
-            iframe.style.border = 'none';
-            iframe.style.overflow = 'auto';
-            iframe.style.backgroundColor = 'white';
-            iframe.style.position = 'relative';
-            iframe.style.zIndex = '1';
-            
-            // 添加加载提示
-            const loadingDiv = document.createElement('div');
-            loadingDiv.style.position = 'absolute';
-            loadingDiv.style.top = '50%';
-            loadingDiv.style.left = '50%';
-            loadingDiv.style.transform = 'translate(-50%, -50%)';
-            loadingDiv.style.zIndex = '2';
-            loadingDiv.style.backgroundColor = 'rgba(255,255,255,0.9)';
-            loadingDiv.style.padding = '20px';
-            loadingDiv.style.borderRadius = '8px';
-            loadingDiv.style.fontSize = '16px';
-            loadingDiv.style.color = '#666';
-            loadingDiv.textContent = '页面加载中...';
-            contentDiv.appendChild(loadingDiv);
-            
-            // 添加加载完成事件
-            iframe.onload = function() {
-                console.log('iframe页面加载完成');
-                // 隐藏加载提示
-                if (loadingDiv && loadingDiv.parentNode) {
-                    loadingDiv.parentNode.removeChild(loadingDiv);
-                }
-            };
-            
-            // 添加错误处理
-            iframe.onerror = function() {
-                console.log('iframe页面加载失败，尝试普通方式');
-                // 移除iframe和加载提示
-                contentDiv.innerHTML = '';
-                // 继续执行普通的fetch方式
-                loadPageNormally();
-            };
-            
-            // 添加超时处理
-            setTimeout(() => {
-                if (loadingDiv && loadingDiv.parentNode) {
-                    console.log('iframe加载超时，尝试普通方式');
-                    contentDiv.innerHTML = '';
-                    loadPageNormally();
-                }
-            }, 10000); // 10秒超时
-            
-            // 使用已定义的loadPageNormally函数
-            
-            contentDiv.appendChild(iframe);
+            console.log('Android QQ浏览器使用特殊处理');
+            loadPageWithProxy();
             return;
+        }
+        
+        // Android QQ浏览器特殊处理函数
+        function loadPageWithProxy() {
+            console.log('Android QQ浏览器使用代理方式加载页面');
+            
+            fetch(selectedFile + '?t=' + Date.now(), fetchOptions)
+                .then(response => {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    return response.text();
+                })
+                .then(html => {
+                    // 预处理HTML，替换workers.dev图片URL
+                    html = html.replace(
+                        /https:\/\/[^"]*\.workers\.dev[^"]*/g,
+                        function(match) {
+                            // 使用代理服务替换workers.dev图片
+                            const proxyUrl = 'https://images.weserv.nl/?url=' + encodeURIComponent(match);
+                            console.log('替换workers.dev图片:', match, '->', proxyUrl);
+                            return proxyUrl;
+                        }
+                    );
+                    
+                    // 移除可能被阻止的属性
+                    html = html.replace(/crossorigin="[^"]*"/gi, '');
+                    html = html.replace(/referrerpolicy="[^"]*"/gi, '');
+                    
+                    // 插入HTML
+                    contentDiv.innerHTML = html;
+                    
+                    // 执行后续处理
+                    executePostLoadTasks();
+                })
+                .catch(error => {
+                    console.error('代理加载失败:', error);
+                    // 回退到普通方式
+                    loadPageNormally();
+                });
         }
         
         // 普通加载方式的函数
@@ -893,6 +897,13 @@
                 const images = contentDiv.querySelectorAll('img');
                 images.forEach(img => {
                     if (img.src) {
+                        // Android QQ浏览器特殊处理 - 替换workers.dev图片
+                        if (isAndroidQQ && img.src.includes('workers.dev')) {
+                            const proxyUrl = 'https://images.weserv.nl/?url=' + encodeURIComponent(img.src);
+                            console.log('替换图片URL:', img.src, '->', proxyUrl);
+                            img.src = proxyUrl;
+                        }
+                        
                         // 移除可能被QQ浏览器阻止的属性
                         img.removeAttribute('crossorigin');
                         img.removeAttribute('referrerpolicy');
@@ -906,6 +917,18 @@
                 for (let script of scripts) {
                     if (script.textContent.includes('loadImage')) {
                         let modifiedScript = script.textContent;
+                        
+                        if (isAndroidQQ) {
+                            // Android QQ浏览器特殊处理 - 替换workers.dev图片URL
+                            modifiedScript = modifiedScript.replace(
+                                /https:\/\/[^"]*\.workers\.dev[^"]*/g,
+                                function(match) {
+                                    const proxyUrl = 'https://images.weserv.nl/?url=' + encodeURIComponent(match);
+                                    console.log('脚本中替换workers.dev图片:', match, '->', proxyUrl);
+                                    return proxyUrl;
+                                }
+                            );
+                        }
                         
                         if (isQQBrowser) {
                             // QQ浏览器简单处理 - 只设置loading属性
