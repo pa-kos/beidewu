@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>随机涩图2.0</title>
+    <title>随机涩图</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -590,6 +590,9 @@
                            /MQQBrowser/i.test(navigator.userAgent) ||
                            /QQBrowser/i.test(navigator.userAgent);
         
+        // 检测Android QQ浏览器环境
+        const isAndroidQQ = /Android/i.test(navigator.userAgent) && isQQBrowser;
+        
         // 在QQ浏览器中禁用统计功能
         if (isQQBrowser) {
             console.log('检测到QQ浏览器环境，禁用统计功能');
@@ -611,8 +614,13 @@
             document.createElement = function(tagName) {
                 const element = originalCreateElement.call(this, tagName);
                 if (tagName.toLowerCase() === 'img') {
-                    element.crossOrigin = 'anonymous';
-                    element.referrerPolicy = 'no-referrer';
+                    if (isAndroidQQ) {
+                        // Android QQ浏览器特殊处理 - 不设置可能被阻止的属性
+                        element.loading = 'eager';
+                    } else {
+                        element.crossOrigin = 'anonymous';
+                        element.referrerPolicy = 'no-referrer';
+                    }
                 }
                 return element;
             };
@@ -623,15 +631,40 @@
                     mutation.addedNodes.forEach(function(node) {
                         if (node.nodeType === 1) { // Element node
                             if (node.tagName === 'IMG') {
-                                node.crossOrigin = 'anonymous';
-                                node.referrerPolicy = 'no-referrer';
+                                if (isAndroidQQ) {
+                                    // Android QQ浏览器特殊处理
+                                    node.loading = 'eager';
+                                    // 尝试重新加载图片
+                                    const originalSrc = node.src;
+                                    if (originalSrc) {
+                                        node.src = '';
+                                        setTimeout(() => {
+                                            node.src = originalSrc;
+                                        }, 50);
+                                    }
+                                } else {
+                                    node.crossOrigin = 'anonymous';
+                                    node.referrerPolicy = 'no-referrer';
+                                }
                             }
                             // 检查子元素中的图片
                             const images = node.querySelectorAll && node.querySelectorAll('img');
                             if (images) {
                                 images.forEach(img => {
-                                    img.crossOrigin = 'anonymous';
-                                    img.referrerPolicy = 'no-referrer';
+                                    if (isAndroidQQ) {
+                                        // Android QQ浏览器特殊处理
+                                        img.loading = 'eager';
+                                        const originalSrc = img.src;
+                                        if (originalSrc) {
+                                            img.src = '';
+                                            setTimeout(() => {
+                                                img.src = originalSrc;
+                                            }, 50);
+                                        }
+                                    } else {
+                                        img.crossOrigin = 'anonymous';
+                                        img.referrerPolicy = 'no-referrer';
+                                    }
                                 });
                             }
                         }
@@ -693,6 +726,9 @@
                            /MQQBrowser/i.test(navigator.userAgent) ||
                            /QQBrowser/i.test(navigator.userAgent);
         
+        // 检测Android QQ浏览器环境
+        const isAndroidQQ = /Android/i.test(navigator.userAgent) && isQQBrowser;
+        
         const fetchOptions = isShortLinkAccess ? {
             mode: 'cors',
             credentials: 'omit',
@@ -727,6 +763,19 @@
                             img.crossOrigin = 'anonymous';
                             // 移除可能的referrer限制
                             img.referrerPolicy = 'no-referrer';
+                            
+                            // Android QQ浏览器特殊处理
+                            if (isAndroidQQ) {
+                                // 移除可能被阻止的属性
+                                img.removeAttribute('crossorigin');
+                                img.removeAttribute('referrerpolicy');
+                                // 尝试重新设置src
+                                const originalSrc = img.src;
+                                img.src = '';
+                                setTimeout(() => {
+                                    img.src = originalSrc;
+                                }, 100);
+                            }
                         }
                     });
                     
@@ -734,11 +783,27 @@
                     const scripts = contentDiv.getElementsByTagName('script');
                     for (let script of scripts) {
                         if (script.textContent.includes('loadImage')) {
-                            // 修改脚本执行环境，添加跨域支持
-                            const modifiedScript = script.textContent.replace(
-                                /new\s+Image\(\)/g, 
-                                '(() => { const img = new Image(); img.crossOrigin = "anonymous"; img.referrerPolicy = "no-referrer"; return img; })()'
-                            );
+                            let modifiedScript = script.textContent;
+                            
+                            if (isAndroidQQ) {
+                                // Android QQ浏览器特殊处理 - 更激进的修复
+                                modifiedScript = modifiedScript.replace(
+                                    /new\s+Image\(\)/g, 
+                                    '(() => { const img = new Image(); img.crossOrigin = "anonymous"; img.referrerPolicy = "no-referrer"; img.loading = "eager"; return img; })()'
+                                );
+                                // 添加重试机制
+                                modifiedScript = modifiedScript.replace(
+                                    /img\.src\s*=/g,
+                                    'img.src = ""; setTimeout(() => { img.src = '
+                                );
+                            } else {
+                                // 普通QQ浏览器处理
+                                modifiedScript = modifiedScript.replace(
+                                    /new\s+Image\(\)/g, 
+                                    '(() => { const img = new Image(); img.crossOrigin = "anonymous"; img.referrerPolicy = "no-referrer"; return img; })()'
+                                );
+                            }
+                            
                             new Function(modifiedScript)();
                         }
                     }
