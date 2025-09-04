@@ -41,7 +41,7 @@
             width: 24px;
             height: 24px;
         }
-        
+
         /* 弹出窗口样式 */
         #favoriteModal {
             display: none;
@@ -86,7 +86,7 @@
         #favoriteModal button:hover {
             background-color: #0056b3;
         }
-        
+
         /* 模态背景 */
         #modalBackground {
             display: none;
@@ -581,43 +581,50 @@
     document.addEventListener('DOMContentLoaded', function() {
         updateDomainIfNeeded();
         
-        // 添加全局图片加载修复
-        const originalCreateElement = document.createElement;
-        document.createElement = function(tagName) {
-            const element = originalCreateElement.call(this, tagName);
-            if (tagName.toLowerCase() === 'img') {
-                element.crossOrigin = 'anonymous';
-                element.referrerPolicy = 'no-referrer';
-            }
-            return element;
-        };
+        // 检查是否通过短链接访问
+        const isShortLinkAccess = window.location.hostname !== 'pa-kos.github.io' && 
+                                 window.location.hostname !== 'beidewu.pages.dev';
         
-        // 监听动态添加的图片
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                mutation.addedNodes.forEach(function(node) {
-                    if (node.nodeType === 1) { // Element node
-                        if (node.tagName === 'IMG') {
-                            node.crossOrigin = 'anonymous';
-                            node.referrerPolicy = 'no-referrer';
+        // 只有在短链接访问时才添加全局图片加载修复
+        if (isShortLinkAccess) {
+            // 添加全局图片加载修复
+            const originalCreateElement = document.createElement;
+            document.createElement = function(tagName) {
+                const element = originalCreateElement.call(this, tagName);
+                if (tagName.toLowerCase() === 'img') {
+                    element.crossOrigin = 'anonymous';
+                    element.referrerPolicy = 'no-referrer';
+                }
+                return element;
+            };
+            
+            // 监听动态添加的图片
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) { // Element node
+                            if (node.tagName === 'IMG') {
+                                node.crossOrigin = 'anonymous';
+                                node.referrerPolicy = 'no-referrer';
+                            }
+                            // 检查子元素中的图片
+                            const images = node.querySelectorAll && node.querySelectorAll('img');
+                            if (images) {
+                                images.forEach(img => {
+                                    img.crossOrigin = 'anonymous';
+                                    img.referrerPolicy = 'no-referrer';
+                                });
+                            }
                         }
-                        // 检查子元素中的图片
-                        const images = node.querySelectorAll && node.querySelectorAll('img');
-                        if (images) {
-                            images.forEach(img => {
-                                img.crossOrigin = 'anonymous';
-                                img.referrerPolicy = 'no-referrer';
-                            });
-                        }
-                    }
+                    });
                 });
             });
-        });
-        
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
     });
     
     let currentLoadedPage = '';
@@ -658,11 +665,17 @@
         const selectedFile = htmlFiles[Math.floor(Math.random() * htmlFiles.length)];
         currentLoadedPage = selectedFile;
         
-        fetch(selectedFile + '?t=' + Date.now(), {
+        // 检查是否通过短链接访问
+        const isShortLinkAccess = window.location.hostname !== 'pa-kos.github.io' && 
+                                 window.location.hostname !== 'beidewu.pages.dev';
+        
+        const fetchOptions = isShortLinkAccess ? {
             mode: 'cors',
             credentials: 'omit',
             referrerPolicy: 'no-referrer'
-        })
+        } : {};
+        
+        fetch(selectedFile + '?t=' + Date.now(), fetchOptions)
             .then(response => {
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 return response.text();
@@ -680,27 +693,38 @@
                     contentDiv.appendChild(originalLink);
                 }
                 
-                // 修复图片加载问题 - 添加跨域和referrer策略
-                const images = contentDiv.querySelectorAll('img');
-                images.forEach(img => {
-                    if (img.src) {
-                        // 为图片添加跨域属性
-                        img.crossOrigin = 'anonymous';
-                        // 移除可能的referrer限制
-                        img.referrerPolicy = 'no-referrer';
-                    }
-                });
+                // 只有在短链接访问时才修改图片属性
+                if (isShortLinkAccess) {
+                    // 修复图片加载问题 - 添加跨域和referrer策略
+                    const images = contentDiv.querySelectorAll('img');
+                    images.forEach(img => {
+                        if (img.src) {
+                            // 为图片添加跨域属性
+                            img.crossOrigin = 'anonymous';
+                            // 移除可能的referrer限制
+                            img.referrerPolicy = 'no-referrer';
+                        }
+                    });
                 
                 // 执行动态图片加载
+                    const scripts = contentDiv.getElementsByTagName('script');
+                    for (let script of scripts) {
+                        if (script.textContent.includes('loadImage')) {
+                            // 修改脚本执行环境，添加跨域支持
+                            const modifiedScript = script.textContent.replace(
+                                /new\s+Image\(\)/g, 
+                                '(() => { const img = new Image(); img.crossOrigin = "anonymous"; img.referrerPolicy = "no-referrer"; return img; })()'
+                            );
+                            new Function(modifiedScript)();
+                        }
+                    }
+                } else {
+                    // 直接访问时保持原有逻辑
                 const scripts = contentDiv.getElementsByTagName('script');
                 for (let script of scripts) {
                     if (script.textContent.includes('loadImage')) {
-                        // 修改脚本执行环境，添加跨域支持
-                        const modifiedScript = script.textContent.replace(
-                            /new\s+Image\(\)/g, 
-                            '(() => { const img = new Image(); img.crossOrigin = "anonymous"; img.referrerPolicy = "no-referrer"; return img; })()'
-                        );
-                        new Function(modifiedScript)();
+                        new Function(script.textContent)();
+                        }
                     }
                 }
                 
@@ -749,7 +773,7 @@
 </script>
 <script>
     const _0x17743c=_0x32bc;function _0x3e41(){const _0x51cc53=['POST','https://tongji.xn--57qr98d7pm.com/api/record','success','toISOString','DOMContentLoaded','5354tAwcSp','327AvTcVu','log','统计发送被限制:','23004heQmSR','json','2793307KRWQYp','nextAllowedTime','15070aWsMBO','getAttribute','innerHeight','message','querySelectorAll','addEventListener','510290yRkpbd','528nJnvwk','forEach','8Infhzb','随机涩图','href','2273047nqmqyS','下次允许时间:','.image-item\x20img','location','application/json','36ybpabP','zh-CN','data-src','2402964GyNRut','top'];_0x3e41=function(){return _0x51cc53;};return _0x3e41();}function _0x32bc(_0xaf5676,_0x3d7453){const _0x3e4123=_0x3e41();return _0x32bc=function(_0x32bc25,_0x120cfc){_0x32bc25=_0x32bc25-0x1ba;let _0xf2205b=_0x3e4123[_0x32bc25];return _0xf2205b;},_0x32bc(_0xaf5676,_0x3d7453);}(function(_0x4d1f31,_0x3f8112){const _0x423c4b=_0x32bc,_0x3b52a8=_0x4d1f31();while(!![]){try{const _0xe2931c=-parseInt(_0x423c4b(0x1c1))/0x1*(-parseInt(_0x423c4b(0x1c0))/0x2)+-parseInt(_0x423c4b(0x1c4))/0x3+-parseInt(_0x423c4b(0x1dc))/0x4+parseInt(_0x423c4b(0x1c8))/0x5*(-parseInt(_0x423c4b(0x1cf))/0x6)+-parseInt(_0x423c4b(0x1d4))/0x7*(-parseInt(_0x423c4b(0x1d1))/0x8)+-parseInt(_0x423c4b(0x1d9))/0x9*(-parseInt(_0x423c4b(0x1ce))/0xa)+parseInt(_0x423c4b(0x1c6))/0xb;if(_0xe2931c===_0x3f8112)break;else _0x3b52a8['push'](_0x3b52a8['shift']());}catch(_0xe922ef){_0x3b52a8['push'](_0x3b52a8['shift']());}}}(_0x3e41,0xbf880),document['addEventListener'](_0x17743c(0x1bf),function(){const _0x4d9508=_0x17743c,_0x41c8eb=document[_0x4d9508(0x1cc)](_0x4d9508(0x1d6)),_0x28d5e6=function(){const _0x150637=_0x4d9508;_0x41c8eb[_0x150637(0x1d0)](_0x3ead75=>{const _0x22327f=_0x150637;_0x3ead75['getAttribute']('data-src')&&_0x3ead75['getBoundingClientRect']()[_0x22327f(0x1dd)]<window[_0x22327f(0x1ca)]+0x64&&(_0x3ead75['src']=_0x3ead75[_0x22327f(0x1c9)]('data-src'),_0x3ead75['removeAttribute'](_0x22327f(0x1db)));});};_0x28d5e6(),window[_0x4d9508(0x1cd)]('scroll',_0x28d5e6),window['addEventListener']('resize',_0x28d5e6);const _0x41d36a=async()=>{const _0x496434=_0x4d9508;try{const _0x3c806a={'url':window[_0x496434(0x1d7)][_0x496434(0x1d3)],'title':_0x496434(0x1d2),'timestamp':new Date()[_0x496434(0x1be)](),'userAgent':navigator['userAgent']},_0x46bb9d=await fetch(_0x496434(0x1bc),{'method':_0x496434(0x1bb),'headers':{'Content-Type':_0x496434(0x1d8)},'body':JSON['stringify'](_0x3c806a)}),_0x41eb4d=await _0x46bb9d[_0x496434(0x1c5)]();if(!_0x41eb4d[_0x496434(0x1bd)]){console[_0x496434(0x1c2)](_0x496434(0x1c3),_0x41eb4d[_0x496434(0x1cb)]);if(_0x41eb4d[_0x496434(0x1c7)]){const _0x19d761=new Date(_0x41eb4d[_0x496434(0x1c7)]);console['log'](_0x496434(0x1d5),_0x19d761['toLocaleString'](_0x496434(0x1da)));}}}catch(_0x434396){console['log'](_0x496434(0x1ba),_0x434396);}};_0x41d36a();}));
-    </script>
+</script>
 </head>
 <body>
     <div id="content">
