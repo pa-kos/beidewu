@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>随机涩图3</title>
+    <title>随机涩图</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -767,75 +767,153 @@
             referrerPolicy: 'no-referrer'
         } : {};
         
-        // 在Android QQ浏览器中使用iframe加载
+        // 在Android QQ浏览器中使用倒计时和URL显示
         if (isAndroidQQ) {
-            console.log('Android QQ浏览器使用iframe加载');
+            console.log('Android QQ浏览器使用倒计时和URL显示');
             loadPageWithIframe();
             return;
         }
         
-        // Android QQ浏览器iframe加载函数
+        // Android QQ浏览器倒计时和URL显示函数
         function loadPageWithIframe() {
-            console.log('Android QQ浏览器使用iframe加载页面');
+            console.log('Android QQ浏览器使用倒计时和URL显示');
             
             // 清空内容区域
             contentDiv.innerHTML = '';
             
-            // 创建iframe
-            const iframe = document.createElement('iframe');
-            iframe.src = selectedFile + '?t=' + Date.now();
-            iframe.style.width = '100%';
-            iframe.style.height = '100vh';
-            iframe.style.border = 'none';
-            iframe.style.overflow = 'auto';
-            iframe.style.backgroundColor = 'white';
+            // 创建倒计时和URL显示界面
+            const countdownContainer = document.createElement('div');
+            countdownContainer.style.cssText = `
+                text-align: center;
+                padding: 50px 20px;
+                max-width: 600px;
+                margin: 0 auto;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 15px;
+                color: white;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
             
-            // 添加加载提示
-            const loadingDiv = document.createElement('div');
-            loadingDiv.style.cssText = `
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 2;
+            // 标题
+            const title = document.createElement('div');
+            title.style.cssText = `
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 30px;
+                text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            `;
+            title.textContent = '正在为你随机涩图...';
+            
+            // 倒计时显示
+            const countdownDisplay = document.createElement('div');
+            countdownDisplay.style.cssText = `
+                font-size: 72px;
+                font-weight: bold;
+                margin: 30px 0;
+                text-shadow: 0 4px 8px rgba(0,0,0,0.5);
+                min-height: 100px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            countdownDisplay.textContent = '3';
+            
+            // URL文本框
+            const urlContainer = document.createElement('div');
+            urlContainer.style.cssText = `
+                margin: 30px 0;
+                opacity: 0;
+                transition: opacity 0.5s ease;
+            `;
+            
+            const urlLabel = document.createElement('div');
+            urlLabel.style.cssText = `
+                font-size: 16px;
+                margin-bottom: 10px;
+                color: rgba(255,255,255,0.9);
+            `;
+            urlLabel.textContent = '随机到的涩图链接：';
+            
+            const urlInput = document.createElement('input');
+            urlInput.type = 'text';
+            urlInput.readOnly = true;
+            urlInput.value = '';
+            urlInput.style.cssText = `
+                width: 100%;
+                padding: 15px;
+                border: none;
+                border-radius: 8px;
+                font-size: 14px;
                 background: rgba(255,255,255,0.9);
-                padding: 20px;
+                color: #333;
+                box-sizing: border-box;
+                word-break: break-all;
+            `;
+            
+            // 复制按钮
+            const copyButton = document.createElement('button');
+            copyButton.style.cssText = `
+                width: 100%;
+                padding: 15px;
+                margin-top: 15px;
+                background: #ff6b6b;
+                color: white;
+                border: none;
                 border-radius: 8px;
                 font-size: 16px;
-                color: #666;
-                text-align: center;
+                font-weight: bold;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(255,107,107,0.4);
+                transition: all 0.3s ease;
+                line-height: 1.4;
             `;
-            loadingDiv.innerHTML = `
-                <div style="font-size: 24px; margin-bottom: 10px;">⏳</div>
-                <div>页面加载中...</div>
+            copyButton.innerHTML = `
+                <div>涩图已准备好，点我复制后</div>
+                <div>到浏览器打开查看！</div>
             `;
-            contentDiv.appendChild(loadingDiv);
             
-            // 添加iframe到页面
-            contentDiv.appendChild(iframe);
+            // 组装界面
+            urlContainer.appendChild(urlLabel);
+            urlContainer.appendChild(urlInput);
+            urlContainer.appendChild(copyButton);
             
-            // 加载完成事件
-            iframe.onload = function() {
-                console.log('iframe页面加载完成');
-                // 隐藏加载提示
-                if (loadingDiv && loadingDiv.parentNode) {
-                    loadingDiv.parentNode.removeChild(loadingDiv);
+            countdownContainer.appendChild(title);
+            countdownContainer.appendChild(countdownDisplay);
+            countdownContainer.appendChild(urlContainer);
+            
+            contentDiv.appendChild(countdownContainer);
+            
+            // 倒计时逻辑
+            let count = 3;
+            const countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownDisplay.textContent = count;
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownDisplay.textContent = '🎉';
+                    
+                    // 显示URL
+                    urlInput.value = selectedFile;
+                    urlContainer.style.opacity = '1';
+                    
+                    // 复制按钮功能
+                    copyButton.onclick = function() {
+                        urlInput.select();
+                        document.execCommand('copy');
+                        
+                        // 按钮反馈
+                        const originalText = copyButton.innerHTML;
+                        copyButton.innerHTML = '<div>✅ 已复制到剪贴板！</div><div>快去浏览器打开吧！</div>';
+                        copyButton.style.background = '#51cf66';
+                        
+                        setTimeout(() => {
+                            copyButton.innerHTML = originalText;
+                            copyButton.style.background = '#ff6b6b';
+                        }, 2000);
+                    };
                 }
-            };
-            
-            // 错误处理
-            iframe.onerror = function() {
-                console.log('iframe页面加载失败');
-                contentDiv.innerHTML = `
-                    <div style="text-align: center; padding: 50px; color: #999;">
-                        <div style="font-size: 24px; margin-bottom: 20px;">❌</div>
-                        <div>页面加载失败</div>
-                        <div style="margin-top: 20px;">
-                            <button onclick="window.location.reload()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">重新加载</button>
-                        </div>
-                    </div>
-                `;
-            };
+            }, 1000);
         }
         
         // Android QQ浏览器直接HTML加载函数
