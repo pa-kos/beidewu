@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>随机涩图</title>
+    <title>随机涩图2.0</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -834,12 +834,20 @@
             `;
             urlLabel.textContent = '随机到的涩图链接：';
             
+            // URL输入框容器
+            const urlInputContainer = document.createElement('div');
+            urlInputContainer.style.cssText = `
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            `;
+            
             const urlInput = document.createElement('input');
             urlInput.type = 'text';
             urlInput.readOnly = true;
             urlInput.value = '';
             urlInput.style.cssText = `
-                width: 100%;
+                flex: 1;
                 padding: 15px;
                 border: none;
                 border-radius: 8px;
@@ -849,6 +857,23 @@
                 box-sizing: border-box;
                 word-break: break-all;
             `;
+            
+            // 换一个按钮
+            const changeButton = document.createElement('button');
+            changeButton.style.cssText = `
+                padding: 15px 20px;
+                background: #28a745;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: bold;
+                cursor: pointer;
+                white-space: nowrap;
+                box-shadow: 0 4px 15px rgba(40,167,69,0.4);
+                transition: all 0.3s ease;
+            `;
+            changeButton.textContent = '换一个';
             
             // 复制按钮
             const copyButton = document.createElement('button');
@@ -872,10 +897,31 @@
                 <div>到浏览器打开查看！</div>
             `;
             
+            // 进群按钮
+            const groupButton = document.createElement('button');
+            groupButton.style.cssText = `
+                width: 100%;
+                padding: 15px;
+                margin-top: 10px;
+                background: #007bff;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(0,123,255,0.4);
+                transition: all 0.3s ease;
+            `;
+            groupButton.textContent = '进群关注更新';
+            
             // 组装界面
             urlContainer.appendChild(urlLabel);
-            urlContainer.appendChild(urlInput);
+            urlInputContainer.appendChild(urlInput);
+            urlInputContainer.appendChild(changeButton);
+            urlContainer.appendChild(urlInputContainer);
             urlContainer.appendChild(copyButton);
+            urlContainer.appendChild(groupButton);
             
             countdownContainer.appendChild(title);
             countdownContainer.appendChild(countdownDisplay);
@@ -911,6 +957,31 @@
                             copyButton.innerHTML = originalText;
                             copyButton.style.background = '#ff6b6b';
                         }, 2000);
+                    };
+                    
+                    // 进群按钮功能
+                    groupButton.onclick = function() {
+                        window.open('https://xn--djr07sn3v.com', '_blank');
+                    };
+                    
+                    // 换一个按钮功能
+                    changeButton.onclick = function() {
+                        // 禁用按钮防止重复点击
+                        changeButton.disabled = true;
+                        changeButton.textContent = '随机中...';
+                        changeButton.style.background = '#6c757d';
+                        
+                        // 1秒后重新随机
+                        setTimeout(() => {
+                            const newRandomIndex = Math.floor(Math.random() * htmlFiles.length);
+                            const newSelectedFile = htmlFiles[newRandomIndex];
+                            urlInput.value = newSelectedFile;
+                            
+                            // 恢复按钮
+                            changeButton.disabled = false;
+                            changeButton.textContent = '换一个';
+                            changeButton.style.background = '#28a745';
+                        }, 1000);
                     };
                 }
             }, 1000);
